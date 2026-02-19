@@ -1,7 +1,10 @@
 import os
 
+from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel import SQLModel
+
+load_dotenv()
 
 DATABASE_URL = os.environ.get("DATABASE_URL").replace(
     "postgresql://", "postgresql+asyncpg://"
