@@ -20,8 +20,6 @@ AsyncSessionLocal = async_sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
 )
 
-print(DATABASE_URL)
-
 
 async def get_session():
     async with AsyncSessionLocal() as session:

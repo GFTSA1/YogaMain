@@ -1,4 +1,4 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -39,9 +39,9 @@ class GroupTrainingStudio(PKMixin, table=True):
 
 
 class YogaCourse(PKMixin, table=True):
-    name: str
+    name: str = Field(min_length=3)
     description: str
-    price: float
+    price: float = Field(default=0.0, ge=0)
     level: str
 
 
