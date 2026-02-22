@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -23,10 +23,10 @@ async def create_courses(
     return course
 
 
-@courses_router.get("", response_model=List[YogaCourse], status_code=status.HTTP_200_OK)
+@courses_router.get("", response_model=list[YogaCourse], status_code=status.HTTP_200_OK)
 async def get_all_courses(
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> List[YogaCourse]:
+) -> list[YogaCourse]:
     courses = (await session.exec(select(YogaCourse))).all()
     return courses
 
