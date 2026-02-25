@@ -3,8 +3,11 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 
-class User(SQLModel, table=True):
+class PKMixin(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
+
+
+class User(PKMixin, table=True):
     email: str
     first_name: str
     last_name: str
@@ -12,15 +15,13 @@ class User(SQLModel, table=True):
     role: str
 
 
-class Studio(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class Studio(PKMixin, table=True):
     city: str = Field(index=True)
     capacity: int
     address: str
 
 
-class GroupTrainingInfo(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class GroupTrainingInfo(PKMixin, table=True):
     level: str
     name: str
     description: str
@@ -28,37 +29,32 @@ class GroupTrainingInfo(SQLModel, table=True):
     price: float
 
 
-class GroupTrainingStudioUser(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class GroupTrainingStudioUser(PKMixin, table=True):
 
     group_training_studio_id: int = Field(default=None)
     user_id: int = Field(foreign_key="user.id")
 
 
-class GroupTrainingStudio(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class GroupTrainingStudio(PKMixin, table=True):
     date: datetime = Field(default_factory=datetime.now(ZoneInfo("Europe/Kyiv")))
     studio_id: int = Field(foreign_key="studio.id")
 
 
-class YogaCourse(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    name: str
+class YogaCourse(PKMixin, table=True):
+    name: str = Field(min_length=3)
     description: str
-    price: float
+    price: float = Field(default=0.0, ge=0)
     level: str
 
 
-class UserYogaCourse(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class UserYogaCourse(PKMixin, table=True):
     is_paid: bool
 
     course_id: int = Field(foreign_key="yogacourse.id")
     user_id: int = Field(foreign_key="user.id")
 
 
-class Trip(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class Trip(PKMixin, table=True):
     name: str
     description: str
     location: str
@@ -66,8 +62,7 @@ class Trip(SQLModel, table=True):
     end_date: datetime
 
 
-class Video(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class Video(PKMixin, table=True):
     title: str
     link: str
 
