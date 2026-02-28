@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.models import YogaCourse
+from app.models import YogaCourse, Trip
 
 
 async def test_yoga_course_valid_data(db_session):
