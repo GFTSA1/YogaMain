@@ -37,7 +37,9 @@ async def get_trip(
 ) -> Trip:
     trip = await session.get(Trip, trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="Trip not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found"
+        )
     return trip
 
 
@@ -49,7 +51,9 @@ async def update_trip(
 ) -> Trip:
     trip = await session.get(Trip, trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="Trip not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found"
+        )
 
     trip_update = data.model_dump(exclude_unset=True)
 
@@ -67,7 +71,9 @@ async def delete_trip(
     trip = await session.get(Trip, trip_id)
 
     if not trip:
-        raise HTTPException(status_code=404, detail="Trip not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found"
+        )
 
     await session.delete(trip)
     await session.commit()
