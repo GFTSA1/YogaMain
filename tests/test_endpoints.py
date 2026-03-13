@@ -1,3 +1,5 @@
+from http.client import responses
+
 from fastapi import status
 
 
@@ -198,3 +200,136 @@ async def test_delete_course(client):
 
     check_response = await client.get(f"/courses/{course_id}")
     assert check_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+async def test_get_studios(client):
+    await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+
+    await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response = await client.get("/studios")
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), list)
+    assert len(response.json()) == 2
+
+async def test_create_studio(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["city"] == "Lviv"
+
+async def test_studio_creation_wrong_data(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Lviv", "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_get_single_studio(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+    studio_id = response.json()["id"]
+    response = await client.get(f"/studios/{studio_id}")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), dict)
+    assert response.json()["city"] == "Kyiv"
+
+
+async def test_patch_studio(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.patch(
+        f"/studios/{studio_id}",
+        json={'city': 'New York'}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), dict)
+    assert response.json()["city"] == "New York"
+
+
+async def test_patch_studio_wrong_data(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"}
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.patch(
+        f"/studios/{studio_id}",
+        json={'street': 'Gaga 11'}
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+    response = await client.get(
+        f"/studios/{studio_id}",
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["city"] == "Kyiv"
+    assert response.json().get("street") == None
+
+async def test_patch_studio_wrong_data_id(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"}
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.patch(
+        f"/studios/{studio_id+1}",
+        json={'city': 'Jojo'}
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    response = await client.get(
+        f"/studios/{studio_id}",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["city"] == "Kyiv"
+
+async def test_delete_studio(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"}
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.delete(f"/studios/{studio_id}")
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = await client.get(f"/studios/{studio_id}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+async def delete_studio_wrong_id(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"}
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.delete(f"/studios/{studio_id+1}")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    response = await client.get(f"/studios/{studio_id}")
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["city"] == "Kyiv"

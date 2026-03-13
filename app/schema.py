@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
 
+
 class YogaCourseModel(SQLModel):
     name: str = Field(min_length=3)
     description: str
@@ -12,6 +13,7 @@ class StudioModel(SQLModel):
     city: str = Field(min_length=3, max_length=168)
     address: str
     capacity: int = Field(gt=1)
+
 
 class StudioPatchModel(SQLModel):
     city: Optional[str] = Field(default=None, min_length=3, max_length=168)
