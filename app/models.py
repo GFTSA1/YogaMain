@@ -70,7 +70,7 @@ class Trip(PKMixin, table=True):
 
 
 class Video(PKMixin, table=True):
-    title: str
-    link: str
+    title: str = Field(min_length=4, unique=True)
+    link: str = Field(unique=True)
 
     yoga_course_id: int = Field(foreign_key="yogacourse.id")

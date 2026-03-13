@@ -23,3 +23,8 @@ class TripModel(SQLModel):
         if self.end_date <= self.start_date:
             raise ValueError("end_date must be after start_date")
         return self
+
+
+class VideoModel(SQLModel):
+    title: str = Field(min_length=4, unique=True)
+    link: str = Field(unique=True)
