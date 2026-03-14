@@ -1,6 +1,9 @@
+from sqlalchemy import Column
+from sqlalchemy.types import DateTime
 from sqlmodel import SQLModel, Field
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from typing import Optional
 
 
 class PKMixin(SQLModel):
@@ -41,7 +44,7 @@ class GroupTrainingStudio(PKMixin, table=True):
 
 class YogaCourse(PKMixin, table=True):
     name: str = Field(min_length=3)
-    description: str
+    description: Optional[str]
     price: float = Field(default=5.0, gt=0)
     level: str
 
@@ -54,11 +57,15 @@ class UserYogaCourse(PKMixin, table=True):
 
 
 class Trip(PKMixin, table=True):
-    name: str
-    description: str
-    location: str
-    start_date: datetime
-    end_date: datetime
+    name: str = Field(min_length=3, index=True)
+    description: Optional[str]
+    location: str = Field(nullable=False, index=True)
+    start_date: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+    end_date: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
 
 
 class Video(PKMixin, table=True):
