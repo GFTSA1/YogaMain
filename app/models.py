@@ -11,15 +11,22 @@ class PKMixin(SQLModel):
 
 
 class UserTrip(SQLModel, table=True):
-    user_id: int = Field(foreign_key="user.id")
-    trip_id: int = Field(foreign_key="trip.id")
+    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    trip_id: int = Field(foreign_key="trip.id", primary_key=True)
 
 
-class UserYogaCourse(PKMixin, table=True):
+class UserYogaCourse(SQLModel, table=True):
+    course_id: int = Field(foreign_key="yogacourse.id", primary_key=True)
+    user_id: int = Field(foreign_key="user.id", primary_key=True)
+
     is_paid: bool
 
-    course_id: int = Field(foreign_key="yogacourse.id")
-    user_id: int = Field(foreign_key="user.id")
+
+class GroupTrainingStudioUser(SQLModel, table=True):
+    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    group_training_studio_id: int = Field(
+        foreign_key="grouptrainingstudio.id", primary_key=True
+    )
 
 
 class User(PKMixin, table=True):
@@ -40,6 +47,8 @@ class Studio(PKMixin, table=True):
     capacity: int
     address: str
 
+    trainings: list["GroupTrainingStudio"] = Relationship(back_populates="studio")
+
 
 class GroupTrainingInfo(PKMixin, table=True):
     level: str
@@ -48,26 +57,33 @@ class GroupTrainingInfo(PKMixin, table=True):
     duration: int
     price: float
 
-
-class GroupTrainingStudioUser(PKMixin, table=True):
-    group_training_studio_id: int = Field(default=None)
-    user_id: int = Field(foreign_key="user.id")
+    trainings: list["GroupTrainingStudio"] = Relationship(
+        back_populates="training_info"
+    )
 
 
 class GroupTrainingStudio(PKMixin, table=True):
     date: datetime = Field(default_factory=datetime.now(ZoneInfo("Europe/Kyiv")))
     studio_id: int = Field(foreign_key="studio.id")
+    training_info_id: int = Field(foreign_key="grouptraininginfo.id")
+
+    studio: "Studio" = Relationship(back_populates="trainings")
+    training_info: "GroupTrainingInfo" = Relationship(back_populates="trainings")
 
 
 class YogaCourse(PKMixin, table=True):
-    name: str = Field(min_length=3)
-    description: Optional[str]
-    price: float = Field(default=5.0, gt=0)
-    level: str
+    name: str = Field(min_length=3, nullable=False)
+    description: Optional[str] = None
+    price: float = Field(default=5.0, gt=0, nullable=False)
+    level: str = Field(nullable=False)
 
-    videos: list["Video"] = Relationship(back_populates="course")
+    videos: list["Video"] = Relationship(
+        back_populates="course",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    )
     users: list["User"] = Relationship(
-        back_populates="courses", link_model=UserYogaCourse
+        back_populates="courses",
+        link_model=UserYogaCourse,
     )
 
 
@@ -86,8 +102,8 @@ class Trip(PKMixin, table=True):
 
 
 class Video(PKMixin, table=True):
-    title: str
+    title: str = Field(nullable=False)
     link: str
-    yoga_course_id: int = Field(foreign_key="yogacourse.id")
+    yoga_course_id: int = Field(foreign_key="yogacourse.id", nullable=False)
 
     course: Optional["YogaCourse"] = Relationship(back_populates="videos")
