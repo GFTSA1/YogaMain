@@ -11,7 +11,7 @@ studio_router = APIRouter(prefix="/studios", tags=["Studios"])
 
 
 @studio_router.get("", response_model=list[StudioModel], status_code=status.HTTP_200_OK)
-async def get_studio(
+async def get_studios(
     session: Annotated[AsyncSession, Depends(get_session)],
 ):
     studios = (await session.exec(select(Studio))).all()
@@ -35,7 +35,7 @@ async def create_studio(
 async def get_studio(
     studio_id: int, session: Annotated[AsyncSession, Depends(get_session)]
 ):
-    studio = (await session.exec(select(Studio).where(Studio.id == studio_id))).first()
+    studio = await session.get(Studio, studio_id)
     if not studio:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Studio not found"
