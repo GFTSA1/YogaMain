@@ -30,7 +30,6 @@ class GroupTrainingInfo(PKMixin, table=True):
 
 
 class GroupTrainingStudioUser(PKMixin, table=True):
-
     group_training_studio_id: int = Field(default=None)
     user_id: int = Field(foreign_key="user.id")
 
