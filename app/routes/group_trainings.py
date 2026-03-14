@@ -7,7 +7,7 @@ from ..database import get_session
 from ..models import GroupTrainingInfo
 from ..schema import GroupTrainingModel, GroupTrainingPatchModel
 
-group_training_router = APIRouter(prefix="/group-trainings", tags=["group-trainings"])
+group_training_router = APIRouter(prefix="/group-trainings", tags=["Group-trainings"])
 
 
 @group_training_router.get(

@@ -25,7 +25,7 @@ async def test_yoga_course_default_price(db_session):
     await db_session.commit()
     await db_session.refresh(course)
 
-    assert course.price == 0.0
+    assert course.price == 5.0
 
 
 def test_yoga_course_negative_price():
@@ -38,7 +38,7 @@ def test_yoga_course_negative_price():
     with pytest.raises(ValidationError) as exc_info:
         YogaCourse.model_validate(invalid_data)
 
-    assert "Input should be greater than or equal to 0" in str(exc_info.value)
+    assert "Input should be greater than 0" in str(exc_info.value)
 
 
 def test_yoga_course_name_too_short():

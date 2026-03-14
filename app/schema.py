@@ -11,6 +11,13 @@ class YogaCourseModel(SQLModel):
     level: str
 
 
+class YogaCoursePatchModel(SQLModel):
+    name: Optional[str] = Field(default=None, min_length=3)
+    description: Optional[str] = None
+    price: Optional[float] = Field(default=None, gt=0)
+    level: Optional[str] = None
+
+
 class StudioModel(SQLModel):
     city: str = Field(min_length=3, max_length=168)
     address: str
@@ -43,8 +50,3 @@ class GroupTrainingPatchModel(SQLModel):
     description: Optional[str] = None
     level: Optional[TrainingLevel] = None
     duration: Optional[int] = Field(default=1, ge=1)
-class YogaCoursePatchModel(SQLModel):
-    name: Optional[str] = Field(default=None, min_length=3)
-    description: Optional[str] = None
-    price: Optional[float] = Field(default=None, gt=0)
-    level: Optional[str] = None

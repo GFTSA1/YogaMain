@@ -35,8 +35,6 @@ async def test_create_wrong_data(client):
         },
     )
 
-    data = response.json()
-
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
@@ -324,7 +322,7 @@ async def test_delete_studio(client):
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-async def delete_studio_wrong_id(client):
+async def test_delete_studio_wrong_id(client):
     response = await client.post(
         "/studios",
         json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
@@ -407,6 +405,7 @@ async def test_get_all_grouptrainings(client):
     assert isinstance(response.json(), list)
     assert len(response.json()) == 2
 
+
 async def test_get_single_grouptraining(client):
     response = await client.post(
         "/group-trainings",
@@ -428,6 +427,7 @@ async def test_get_single_grouptraining(client):
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["price"] == 49.99
 
+
 async def test_get_single_grouptraining_wrong_id(client):
     response = await client.post(
         "/group-trainings",
@@ -444,6 +444,7 @@ async def test_get_single_grouptraining_wrong_id(client):
 
     response = await client.get(f"/group-trainings/{group_training_id+1}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
 
 async def test_crete_group_training_with_float_at_duration(client):
     response = await client.post(
@@ -464,6 +465,7 @@ async def test_crete_group_training_with_float_at_duration(client):
     assert isinstance(response.json(), list)
     assert len(response.json()) == 0
 
+
 async def test_patch_group_training(client):
     response = await client.post(
         "/group-trainings",
@@ -483,7 +485,7 @@ async def test_patch_group_training(client):
         f"/group-trainings/{group_training_id}",
         json={
             "name": "PoweRRRR",
-        }
+        },
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -492,7 +494,6 @@ async def test_patch_group_training(client):
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["name"] == "PoweRRRR"
-
 
 
 async def test_patch_group_training_short_name(client):
@@ -514,7 +515,7 @@ async def test_patch_group_training_short_name(client):
         f"/group-trainings/{group_training_id}",
         json={
             "name": "Po",
-        }
+        },
     )
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -523,6 +524,7 @@ async def test_patch_group_training_short_name(client):
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["name"] == "Power Yoga Bootcamp"
+
 
 async def test_delete_group_training(client):
     response = await client.post(
@@ -544,6 +546,7 @@ async def test_delete_group_training(client):
 
     response = await client.get(f"/group-trainings/{group_training_id}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
 
 async def test_delete_group_training_with_wrong_id(client):
     response = await client.post(
