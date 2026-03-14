@@ -1,0 +1,268 @@
+{
+	"info": {
+		"_postman_id": "a2b92887-3d14-4314-83ee-cd9891a0e393",
+		"name": "Yoga",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39093679",
+		"_collection_link": "https://backendyoga.postman.co/workspace/BackendYoga-Workspace~3a1740bc-5088-4ddb-8670-0ab237250d15/collection/39093679-a2b92887-3d14-4314-83ee-cd9891a0e393?action=share&source=collection_link&creator=39093679"
+	},
+	"item": [
+		{
+			"name": "Studio",
+			"item": [
+				{
+					"name": "Create Studio",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"city\": \"New York\",\n  \"capacity\": 30,\n  \"address\": \"123 Broadway St, Manhattan, NY 10001\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}studios",
+							"host": [
+								"{{URL}}studios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all studios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}studios",
+							"host": [
+								"{{URL}}studios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get One Studio",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}studios/1",
+							"host": [
+								"{{URL}}studios"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Studio",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"city\": \"Kyiv\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}studios/1",
+							"host": [
+								"{{URL}}studios"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Studio",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"city\": \"Kyiv\"\n}"
+						},
+						"url": {
+							"raw": "{{URL}}studios/1",
+							"host": [
+								"{{URL}}studios"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Group Training Info",
+			"item": [
+				{
+					"name": "Get All Group Trainings",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"city\": \"Kyiv\"\n}"
+						},
+						"url": {
+							"raw": "{{URL}}group-trainings",
+							"host": [
+								"{{URL}}group-trainings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a Group Training Info",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"level\": \"Beginner\",\n  \"name\": \"Morning Flow\",\n  \"description\": \"A gentle yoga session to start your day.\",\n  \"duration\": 60,\n  \"price\": 19.99\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}group-trainings",
+							"host": [
+								"{{URL}}group-trainings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Solo Training Info",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"level\": \"Beginner\",\n  \"name\": \"Morning Flow\",\n  \"description\": \"A gentle yoga session to start your day.\",\n  \"duration\": 60,\n  \"price\": 19.99\n}"
+						},
+						"url": {
+							"raw": "{{URL}}group-trainings/1",
+							"host": [
+								"{{URL}}group-trainings"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": 10.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}group-trainings/1",
+							"host": [
+								"{{URL}}group-trainings"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete A Gfroup Training info",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": 10.00\n}"
+						},
+						"url": {
+							"raw": "{{URL}}group-trainings/1",
+							"host": [
+								"{{URL}}group-trainings"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Create Course",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n            \"name\": \"Test\",\n            \"description\": \"Test description\",\n            \"price\": 10,\n            \"level\": \"Beginner\"\n        }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{URL}}courses",
+					"host": [
+						"{{URL}}courses"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
