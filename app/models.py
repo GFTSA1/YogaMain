@@ -1,6 +1,6 @@
 from sqlalchemy import Column
 from sqlalchemy.types import DateTime
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from typing import Optional
@@ -10,12 +10,29 @@ class PKMixin(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
 
 
+class UserTrip(SQLModel, table=True):
+    user_id: int = Field(foreign_key="user.id")
+    trip_id: int = Field(foreign_key="trip.id")
+
+
+class UserYogaCourse(PKMixin, table=True):
+    is_paid: bool
+
+    course_id: int = Field(foreign_key="yogacourse.id")
+    user_id: int = Field(foreign_key="user.id")
+
+
 class User(PKMixin, table=True):
     email: str
     first_name: str
     last_name: str
     mobile_number: str
     role: str
+
+    trips: list["Trip"] = Relationship(back_populates="users", link_model=UserTrip)
+    courses: list["YogaCourse"] = Relationship(
+        back_populates="users", link_model=UserYogaCourse
+    )
 
 
 class Studio(PKMixin, table=True):
@@ -48,12 +65,10 @@ class YogaCourse(PKMixin, table=True):
     price: float = Field(default=5.0, gt=0)
     level: str
 
-
-class UserYogaCourse(PKMixin, table=True):
-    is_paid: bool
-
-    course_id: int = Field(foreign_key="yogacourse.id")
-    user_id: int = Field(foreign_key="user.id")
+    videos: list["Video"] = Relationship(back_populates="course")
+    users: list["User"] = Relationship(
+        back_populates="courses", link_model=UserYogaCourse
+    )
 
 
 class Trip(PKMixin, table=True):
@@ -67,9 +82,12 @@ class Trip(PKMixin, table=True):
         sa_column=Column(DateTime(timezone=True), nullable=False)
     )
 
+    users: list["User"] = Relationship(back_populates="trips", link_model=UserTrip)
+
 
 class Video(PKMixin, table=True):
     title: str
     link: str
-
     yoga_course_id: int = Field(foreign_key="yogacourse.id")
+
+    course: Optional["YogaCourse"] = Relationship(back_populates="videos")
