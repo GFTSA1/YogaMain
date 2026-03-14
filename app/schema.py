@@ -7,7 +7,7 @@ from typing import Optional
 class YogaCourseModel(SQLModel):
     name: str = Field(min_length=3)
     description: str
-    price: float = Field(default=0.0, ge=0)
+    price: float = Field(default=5.0, gt=0)
     level: str
 
 
@@ -43,3 +43,8 @@ class GroupTrainingPatchModel(SQLModel):
     description: Optional[str] = None
     level: Optional[TrainingLevel] = None
     duration: Optional[int] = Field(default=1, ge=1)
+class YogaCoursePatchModel(SQLModel):
+    name: Optional[str] = Field(default=None, min_length=3)
+    description: Optional[str] = None
+    price: Optional[float] = Field(default=None, gt=0)
+    level: Optional[str] = None
