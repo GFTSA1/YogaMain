@@ -22,21 +22,24 @@ class StudioPatchModel(SQLModel):
     address: Optional[str] = None
     capacity: Optional[int] = Field(gt=1, default=None)
 
+
 class TrainingLevel(str, Enum):
-    Beginner = 'Beginner'
-    Intermediate = 'Intermediate'
-    Advance = 'Advance'
+    Beginner = "Beginner"
+    Intermediate = "Intermediate"
+    Advance = "Advance"
+
 
 class GroupTrainingModel(SQLModel):
     name: str = Field(min_length=3)
     price: float = Field(ge=1)
     description: Optional[str] = None
     level: TrainingLevel
-    duration: float = Field(gt=1)
+    duration: int = Field(gt=1)
+
 
 class GroupTrainingPatchModel(SQLModel):
     name: Optional[str] = Field(default=None, min_length=3)
-    price: Optional[float] = Field(default=1.0, ge=1)
+    price: Optional[float] = Field(default=1, ge=1)
     description: Optional[str] = None
     level: Optional[TrainingLevel] = None
-    duration: Optional[float] = Field(default=1.0, ge=1)
+    duration: Optional[int] = Field(default=1, ge=1)
