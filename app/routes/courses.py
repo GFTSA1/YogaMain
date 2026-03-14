@@ -5,7 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from ..database import get_session
 from ..models import YogaCourse
-from ..schema import YogaCourseModel
+from ..schema import YogaCourseModel, YogaCoursePatchModel
 
 
 courses_router = APIRouter(prefix="/courses", tags=["Courses"])
@@ -50,7 +50,7 @@ async def get_course(
 )
 async def update_course(
     course_id: int,
-    data: YogaCourseModel,
+    data: YogaCoursePatchModel,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> YogaCourse:
     course = await session.get(YogaCourse, course_id)

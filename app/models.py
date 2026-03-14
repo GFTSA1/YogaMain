@@ -33,7 +33,6 @@ class GroupTrainingInfo(PKMixin, table=True):
 
 
 class GroupTrainingStudioUser(PKMixin, table=True):
-
     group_training_studio_id: int = Field(default=None)
     user_id: int = Field(foreign_key="user.id")
 
@@ -46,7 +45,7 @@ class GroupTrainingStudio(PKMixin, table=True):
 class YogaCourse(PKMixin, table=True):
     name: str = Field(min_length=3)
     description: Optional[str]
-    price: float = Field(default=0.0, ge=0)
+    price: float = Field(default=5.0, gt=0)
     level: str
 
 
