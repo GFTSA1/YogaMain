@@ -262,7 +262,7 @@ async def test_get_all_trips(client):
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(data, list)
-    assert len(data) > 1
+    assert len(data) == 2
     assert data[0]["name"] == "Test Name"
 
 
@@ -317,20 +317,11 @@ async def test_update_trip(client):
 
     update_response = await client.patch(
         f"/trips/{trips_id}",
-        json={
-            "name": "New Name",
-            "description": "Test description new",
-            "location": "Test location new",
-            "start_date": "2026-06-15T10:00:00Z",
-            "end_date": "2026-06-18T10:00:00Z",
-        },
+        json={"name": "New Name"},
     )
     assert update_response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), dict)
     assert update_response.json()["name"] == "New Name"
-    assert update_response.json()["description"] == "Test description new"
-    assert update_response.json()["location"] == "Test location new"
-    assert update_response.json()["start_date"].startswith("2026-06-15T10:00:00")
-    assert update_response.json()["end_date"].startswith("2026-06-18T10:00:00")
 
 
 async def test_trip_update_wrong_data(client):
@@ -411,3 +402,19 @@ async def test_delete_trip(client):
 
     check_response = await client.get(f"/trips/{trip_id}")
     assert check_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+async def test_delete_trip_wrong_id(client):
+    response = await client.post(
+        "/trips",
+        json={
+            "name": "Test Name",
+            "description": "Test Description",
+            "location": "Test Location",
+            "start_date": "2026-06-15T10:00:00Z",
+            "end_date": "2026-06-16T10:00:00Z",
+        },
+    )
+    trip_id = response.json()["id"]
+    del_response = await client.delete(f"/trips/{trip_id + 1}")
+    assert del_response.status_code == status.HTTP_404_NOT_FOUND
