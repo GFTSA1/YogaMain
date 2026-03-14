@@ -302,7 +302,7 @@ async def test_get_trip_not_found(client):
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-async def test_update_trip(client):
+async def test_patch_trip(client):
     response = await client.post(
         "/trips",
         json={
@@ -324,7 +324,7 @@ async def test_update_trip(client):
     assert update_response.json()["name"] == "New Name"
 
 
-async def test_trip_update_wrong_data(client):
+async def test_trip_patch_wrong_data(client):
     response = await client.post(
         "/trips",
         json={
@@ -355,7 +355,7 @@ async def test_trip_update_wrong_data(client):
     assert current_data["name"] == "Test Name"
 
 
-async def test_update_wrong_trip_id(client):
+async def test_patch_wrong_trip_id(client):
     response = await client.post(
         "/trips",
         json={
