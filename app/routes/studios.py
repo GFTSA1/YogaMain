@@ -60,7 +60,7 @@ async def update_studio(
     studio_changes = body.model_dump(exclude_unset=True)
     if not studio_changes:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="No fields to update",
         )
 
