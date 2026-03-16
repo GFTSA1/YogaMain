@@ -7,7 +7,7 @@ from ..database import get_session
 from ..models import GroupTrainingInfo
 from ..schema import GroupTrainingModel, GroupTrainingPatchModel
 
-group_training_router = APIRouter(prefix="/group-trainings", tags=["group-trainings"])
+group_training_router = APIRouter(prefix="/group-trainings", tags=["Group-trainings"])
 
 
 @group_training_router.get(
@@ -66,7 +66,7 @@ async def update_group_training(
         )
 
     training_info_changes = data.model_dump(exclude_unset=True)
-    if training_info_changes is None:
+    if not training_info_changes:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Training update is not provided",
