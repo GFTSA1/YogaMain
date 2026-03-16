@@ -67,9 +67,6 @@ class GroupTrainingStudio(PKMixin, table=True):
     studio_id: int = Field(foreign_key="studio.id")
     training_info_id: int = Field(foreign_key="grouptraininginfo.id")
 
-    studio: "Studio" = Relationship(back_populates="trainings")
-    training_info: "GroupTrainingInfo" = Relationship(back_populates="trainings")
-
 
 class YogaCourse(PKMixin, table=True):
     name: str = Field(min_length=3, nullable=False)

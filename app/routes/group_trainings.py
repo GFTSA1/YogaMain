@@ -66,9 +66,9 @@ async def update_group_training(
         )
 
     training_info_changes = data.model_dump(exclude_unset=True)
-    if training_info_changes is None:
+    if not training_info_changes:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Training update is not provided",
         )
 
