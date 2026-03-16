@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 from datetime import datetime
 from sqlmodel import SQLModel, Field
-from pydantic import model_validator
+from pydantic import model_validator, field_validator
 from typing_extensions import Self
 
 
@@ -53,7 +53,7 @@ class GroupTrainingPatchModel(SQLModel):
     level: Optional[TrainingLevel] = None
     duration: Optional[int] = Field(default=1, ge=1)
 
-      
+
 class YogaCoursePatchModel(SQLModel):
     name: Optional[str] = Field(default=None, min_length=3)
     description: Optional[str] = None
@@ -88,3 +88,29 @@ class TripPatchModel(SQLModel):
             if self.end_date <= self.start_date:
                 raise ValueError("new end_date must be after start_date")
         return self
+
+
+class GroupTrainingStudioModel(SQLModel):
+    studio_id: int = Field(ge=1)
+    training_info_id: int = Field(ge=1)
+
+    training_date: datetime
+
+
+class GroupTrainingStudioInputModel(GroupTrainingStudioModel):
+
+    @field_validator("training_date")
+    @classmethod
+    def date_must_be_future(cls, value):
+        if value <= datetime.now():
+            raise ValueError("Time cannot be in the past")
+        return value
+
+class GroupTrainingStudioResponseModel(SQLModel):
+    id: int
+    studio: StudioModel
+    training_info: GroupTrainingModel
+    training_date: datetime
+
+class GroupTrainingStudioModelPatch(SQLModel):
+    pass

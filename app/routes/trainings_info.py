@@ -7,11 +7,11 @@ from ..database import get_session
 from ..models import GroupTrainingInfo
 from ..schema import GroupTrainingModel, GroupTrainingPatchModel
 
-group_training_router = APIRouter(prefix="/group-trainings", tags=["Group-trainings"])
+training_info_router = APIRouter(prefix="/training-info", tags=["Trainings-info"])
 
 
-@group_training_router.get(
-    "", response_model=list[GroupTrainingModel], status_code=status.HTTP_200_OK
+@training_info_router.get(
+    "", response_model=list[GroupTrainingInfo], status_code=status.HTTP_200_OK
 )
 async def get_group_trainings(
     session: Annotated[AsyncSession, Depends(get_session)],
@@ -20,7 +20,7 @@ async def get_group_trainings(
     return trainings_info
 
 
-@group_training_router.post(
+@training_info_router.post(
     "", response_model=GroupTrainingInfo, status_code=status.HTTP_201_CREATED
 )
 async def create_group_training(
@@ -34,7 +34,7 @@ async def create_group_training(
     return training_info
 
 
-@group_training_router.get(
+@training_info_router.get(
     "/{training_id}", response_model=GroupTrainingModel, status_code=status.HTTP_200_OK
 )
 async def get_group_training(
@@ -50,7 +50,7 @@ async def get_group_training(
     return training_info
 
 
-@group_training_router.patch(
+@training_info_router.patch(
     "/{training_id}", response_model=GroupTrainingModel, status_code=status.HTTP_200_OK
 )
 async def update_group_training(
@@ -79,7 +79,7 @@ async def update_group_training(
     return training_info
 
 
-@group_training_router.delete("/{training_id}", status_code=status.HTTP_204_NO_CONTENT)
+@training_info_router.delete("/{training_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_group_training(
     training_id: int, session: Annotated[AsyncSession, Depends(get_session)]
 ):

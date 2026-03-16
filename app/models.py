@@ -4,6 +4,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from typing import Optional
+from sqlalchemy import UniqueConstraint
 
 
 class PKMixin(SQLModel):
@@ -47,8 +48,6 @@ class Studio(PKMixin, table=True):
     capacity: int
     address: str
 
-    trainings: list["GroupTrainingStudio"] = Relationship(back_populates="studio")
-
 
 class GroupTrainingInfo(PKMixin, table=True):
     level: str
@@ -57,15 +56,18 @@ class GroupTrainingInfo(PKMixin, table=True):
     duration: int
     price: float
 
-    trainings: list["GroupTrainingStudio"] = Relationship(
-        back_populates="training_info"
-    )
-
 
 class GroupTrainingStudio(PKMixin, table=True):
-    date: datetime = Field(default_factory=datetime.now(ZoneInfo("Europe/Kyiv")))
-    studio_id: int = Field(foreign_key="studio.id")
-    training_info_id: int = Field(foreign_key="grouptraininginfo.id")
+    __tablename__ = "grouptrainingstudio"
+    __table_args__ = (UniqueConstraint("training_info_id", "studio_id"),)
+
+    training_date: datetime
+    studio_id: int | None = Field(
+        foreign_key="studio.id", ondelete="SET NULL", default=None
+    )
+    training_info_id: int = Field(
+        foreign_key="grouptraininginfo.id", ondelete="CASCADE"
+    )
 
 
 class YogaCourse(PKMixin, table=True):

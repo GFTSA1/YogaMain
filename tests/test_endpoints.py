@@ -442,7 +442,7 @@ async def test_get_single_grouptraining_wrong_id(client):
 
     group_training_id = response.json()["id"]
 
-    response = await client.get(f"/group-trainings/{group_training_id+1}")
+    response = await client.get(f"/group-trainings/{group_training_id + 1}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -563,7 +563,7 @@ async def test_delete_group_training_with_wrong_id(client):
     assert response.status_code == status.HTTP_201_CREATED
 
     group_training_id = response.json()["id"]
-    response = await client.delete(f"/group-trainings/{group_training_id+1}")
+    response = await client.delete(f"/group-trainings/{group_training_id + 1}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
     response = await client.get(f"/group-trainings/{group_training_id}")

@@ -10,7 +10,7 @@ from ..schema import StudioModel, StudioPatchModel
 studio_router = APIRouter(prefix="/studios", tags=["Studios"])
 
 
-@studio_router.get("", response_model=list[StudioModel], status_code=status.HTTP_200_OK)
+@studio_router.get("", response_model=list[Studio], status_code=status.HTTP_200_OK)
 async def get_studios(
     session: Annotated[AsyncSession, Depends(get_session)],
 ):
