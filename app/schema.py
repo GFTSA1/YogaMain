@@ -98,7 +98,6 @@ class GroupTrainingStudioModel(SQLModel):
 
 
 class GroupTrainingStudioInputModel(GroupTrainingStudioModel):
-
     @field_validator("training_date")
     @classmethod
     def date_must_be_future(cls, value):
@@ -106,11 +105,19 @@ class GroupTrainingStudioInputModel(GroupTrainingStudioModel):
             raise ValueError("Time cannot be in the past")
         return value
 
+
 class GroupTrainingStudioResponseModel(SQLModel):
     id: int
     studio: StudioModel
     training_info: GroupTrainingModel
     training_date: datetime
 
-class GroupTrainingStudioModelPatch(SQLModel):
-    pass
+
+class GroupTrainingStudioPatchModel(SQLModel):
+    training_date: datetime
+    @field_validator("training_date")
+    @classmethod
+    def date_must_be_future(cls, value):
+        if value <= datetime.now():
+            raise ValueError("Time cannot be in the past")
+        return value
