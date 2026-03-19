@@ -15,7 +15,7 @@ from ..schema import (
 
 group_training_router = APIRouter(
     prefix="/group-training",
-    tags=["Group-training"],
+    tags=["Group-trainings"],
 )
 
 
@@ -52,30 +52,60 @@ async def get_group_training_studio(session: AsyncSession = Depends(get_session)
 
 
 @group_training_router.post(
-    "", status_code=status.HTTP_201_CREATED, response_model=GroupTrainingStudio
+    "", status_code=status.HTTP_201_CREATED, response_model=GroupTrainingStudioResponseModel
 )
 async def create_group_training_studio(
     data: GroupTrainingStudioInputModel,
     session: AsyncSession = Depends(get_session),
 ):
-    training_info = session.get(GroupTrainingInfo, data.training_info_id)
+    training_info = await session.get(GroupTrainingInfo, data.training_info_id)
     if not training_info:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No training info found"
         )
 
-    studio = session.get(Studio, data.studio_id)
+    studio = await session.get(Studio, data.studio_id)
     if not studio:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No studio found"
         )
 
     group_training = GroupTrainingStudio.model_validate(data)
+
+
     session.add(group_training)
     await session.commit()
-    await session.refresh(group_training)
+    statement = (
+        select(GroupTrainingInfo, GroupTrainingStudio, Studio)
+        .join(
+            GroupTrainingStudio,
+            GroupTrainingStudio.training_info_id == GroupTrainingInfo.id,
+        )
+        .join(
+            Studio,
+            Studio.id == GroupTrainingStudio.studio_id,
+        )
+        .where(GroupTrainingStudio.id == group_training.id)
+    )
 
-    return group_training
+    training_info, training, studio = (await session.exec(statement)).first()
+
+    return GroupTrainingStudioResponseModel(
+        studio=StudioModel(
+            city=studio.city,
+            address=studio.address,
+            capacity=studio.capacity,
+        ),
+        training_info=GroupTrainingModel(
+            name=training_info.name,
+            price=training_info.price,
+            description=training_info.description,
+            level=training_info.level,
+            duration=training_info.duration,
+        ),
+        id=training.id,
+        training_date=training.training_date,
+    )
 
 
 @group_training_router.get(
@@ -100,11 +130,12 @@ async def get_group_training_studio(
         )
         .where(GroupTrainingStudio.id == training_id)
     )
-    training_info, training, studio = (await session.exec(statement)).first()
-    if not training_info:
+    result = (await session.exec(statement)).first()
+    if not result:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="No training info found"
         )
+    training_info, training, studio = result
 
     return GroupTrainingStudioResponseModel(
         studio=StudioModel(
@@ -123,7 +154,7 @@ async def get_group_training_studio(
         training_date=training.training_date,
     )
 
-@group_training_router.patch(path='/{training_id}', response_model=GroupTrainingStudioResponseModel)
+@group_training_router.patch(path='/{training_id}', response_model=GroupTrainingStudioResponseModel, status_code=status.HTTP_200_OK)
 async def patch_group_training(
     training_id: int,
     data: GroupTrainingStudioPatchModel,
