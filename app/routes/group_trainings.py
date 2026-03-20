@@ -4,91 +4,210 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from ..database import get_session
-from ..models import GroupTrainingInfo
-from ..schema import GroupTrainingModel, GroupTrainingPatchModel
-
-group_training_router = APIRouter(prefix="/group-trainings", tags=["Group-trainings"])
-
-
-@group_training_router.get(
-    "", response_model=list[GroupTrainingModel], status_code=status.HTTP_200_OK
+from ..models import GroupTrainingStudio, GroupTrainingInfo, Studio
+from ..schema import (
+    GroupTrainingStudioInputModel,
+    GroupTrainingStudioPatchModel,
+    GroupTrainingStudioResponseModel,
+    StudioModel,
+    GroupTrainingModel,
 )
-async def get_group_trainings(
-    session: Annotated[AsyncSession, Depends(get_session)],
-):
-    trainings_info = (await session.exec(select(GroupTrainingInfo))).all()
-    return trainings_info
+
+group_training_router = APIRouter(
+    prefix="/group-training",
+    tags=["Group-trainings"],
+)
+
+
+@group_training_router.get("", response_model=list[GroupTrainingStudioResponseModel])
+async def get_group_training_studio(session: AsyncSession = Depends(get_session)):
+    statement = (
+        select(GroupTrainingInfo, Studio, GroupTrainingStudio)
+        .join(
+            GroupTrainingStudio,
+            GroupTrainingStudio.training_info_id == GroupTrainingInfo.id,
+        )
+        .join(Studio, Studio.id == GroupTrainingStudio.studio_id)
+    )
+    trainings = (await session.exec(statement)).all()
+    return [
+        GroupTrainingStudioResponseModel(
+            studio=StudioModel(
+                city=studio.city,
+                address=studio.address,
+                capacity=studio.capacity,
+            ),
+            training_info=GroupTrainingModel(
+                name=info.name,
+                price=info.price,
+                description=info.description,
+                level=info.level,
+                duration=info.duration,
+            ),
+            id=training.id,
+            training_date=training.training_date,
+        )
+        for info, studio, training in trainings
+    ]
 
 
 @group_training_router.post(
-    "", response_model=GroupTrainingInfo, status_code=status.HTTP_201_CREATED
+    "", status_code=status.HTTP_201_CREATED, response_model=GroupTrainingStudioResponseModel
 )
-async def create_group_training(
-    body: GroupTrainingModel, session: Annotated[AsyncSession, Depends(get_session)]
+async def create_group_training_studio(
+    data: GroupTrainingStudioInputModel,
+    session: AsyncSession = Depends(get_session),
 ):
-    training_info = GroupTrainingInfo.model_validate(body)
-    session.add(training_info)
-    await session.commit()
-    await session.refresh(training_info)
+    training_info = await session.get(GroupTrainingInfo, data.training_info_id)
+    if not training_info:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No training info found"
+        )
 
-    return training_info
+    studio = await session.get(Studio, data.studio_id)
+    if not studio:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No studio found"
+        )
+
+    group_training = GroupTrainingStudio.model_validate(data)
+
+
+    session.add(group_training)
+    await session.commit()
+    statement = (
+        select(GroupTrainingInfo, GroupTrainingStudio, Studio)
+        .join(
+            GroupTrainingStudio,
+            GroupTrainingStudio.training_info_id == GroupTrainingInfo.id,
+        )
+        .join(
+            Studio,
+            Studio.id == GroupTrainingStudio.studio_id,
+        )
+        .where(GroupTrainingStudio.id == group_training.id)
+    )
+
+    training_info, training, studio = (await session.exec(statement)).first()
+
+    return GroupTrainingStudioResponseModel(
+        studio=StudioModel(
+            city=studio.city,
+            address=studio.address,
+            capacity=studio.capacity,
+        ),
+        training_info=GroupTrainingModel(
+            name=training_info.name,
+            price=training_info.price,
+            description=training_info.description,
+            level=training_info.level,
+            duration=training_info.duration,
+        ),
+        id=training.id,
+        training_date=training.training_date,
+    )
 
 
 @group_training_router.get(
-    "/{training_id}", response_model=GroupTrainingModel, status_code=status.HTTP_200_OK
+    "/{training_id}",
+    response_model=GroupTrainingStudioResponseModel,
+    status_code=status.HTTP_200_OK,
 )
-async def get_group_training(
-    training_id: int, session: Annotated[AsyncSession, Depends(get_session)]
-):
-    training_info = await session.get(GroupTrainingInfo, training_id)
-
-    if training_info is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Training Info not found"
-        )
-
-    return training_info
-
-
-@group_training_router.patch(
-    "/{training_id}", response_model=GroupTrainingModel, status_code=status.HTTP_200_OK
-)
-async def update_group_training(
-    data: GroupTrainingPatchModel,
+async def get_group_training_studio(
     training_id: int,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: AsyncSession = Depends(get_session),
 ):
-    training_info = await session.get(GroupTrainingInfo, training_id)
 
-    if training_info is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Training Info not found"
+    statement = (
+        select(GroupTrainingInfo, GroupTrainingStudio, Studio)
+        .join(
+            GroupTrainingStudio,
+            GroupTrainingStudio.training_info_id == GroupTrainingInfo.id,
         )
-
-    training_info_changes = data.model_dump(exclude_unset=True)
-    if not training_info_changes:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Training update is not provided",
+        .join(
+            Studio,
+            Studio.id == GroupTrainingStudio.studio_id,
         )
+        .where(GroupTrainingStudio.id == training_id)
+    )
+    result = (await session.exec(statement)).first()
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No training info found"
+        )
+    training_info, training, studio = result
 
-    training_info.sqlmodel_update(training_info_changes)
+    return GroupTrainingStudioResponseModel(
+        studio=StudioModel(
+            city=studio.city,
+            address=studio.address,
+            capacity=studio.capacity,
+        ),
+        training_info=GroupTrainingModel(
+            name=training_info.name,
+            price=training_info.price,
+            description=training_info.description,
+            level=training_info.level,
+            duration=training_info.duration,
+        ),
+        id=training.id,
+        training_date=training.training_date,
+    )
+
+@group_training_router.patch(path='/{training_id}', response_model=GroupTrainingStudioResponseModel, status_code=status.HTTP_200_OK)
+async def patch_group_training(
+    training_id: int,
+    data: GroupTrainingStudioPatchModel,
+    session: AsyncSession = Depends(get_session),
+):
+    group_training = await session.get(GroupTrainingStudio, training_id)
+    if not group_training:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No training found")
+
+    group_training_changes = data.model_dump()
+    if not group_training_changes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update"
+        )
+    group_training.sqlmodel_update(group_training_changes)
+    session.add(group_training)
+
     await session.commit()
-    await session.refresh(training_info)
+    statement = (
+        select(GroupTrainingInfo, GroupTrainingStudio, Studio)
+        .join(GroupTrainingStudio,
+              GroupTrainingStudio.training_info_id == GroupTrainingInfo.id)
+        .join(Studio, Studio.id == GroupTrainingStudio.studio_id)
+        .where(GroupTrainingStudio.id == training_id)
+    )
+    group_training, training, studio = (await session.exec(statement)).first()
 
-    return training_info
+    return GroupTrainingStudioResponseModel(
+        studio=StudioModel(
+            city=studio.city,
+            address=studio.address,
+            capacity=studio.capacity,
+        ),
+        training_info=GroupTrainingModel(
+            name=group_training.name,
+            price=group_training.price,
+            description=group_training.description,
+            level=group_training.level,
+            duration=group_training.duration,
+        ),
+        id=training.id,
+        training_date=training.training_date,
+    )
 
-
-@group_training_router.delete("/{training_id}", status_code=status.HTTP_204_NO_CONTENT)
+@group_training_router.delete(path='/{training_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_group_training(
-    training_id: int, session: Annotated[AsyncSession, Depends(get_session)]
+        training_id: int,
+        session: AsyncSession = Depends(get_session),
 ):
-    training_info = await session.get(GroupTrainingInfo, training_id)
-    if training_info is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Training Info not found"
-        )
+    group_training = await session.get(GroupTrainingStudio, training_id)
+    if not group_training:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No training found")
 
-    await session.delete(training_info)
+    await session.delete(group_training)
     await session.commit()
-    return None
+    return

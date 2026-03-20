@@ -280,7 +280,7 @@ async def test_patch_studio_wrong_data(client):
     studio_id = response.json()["id"]
     response = await client.patch(f"/studios/{studio_id}", json={"street": "Gaga 11"})
 
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     response = await client.get(
         f"/studios/{studio_id}",
@@ -343,9 +343,9 @@ TESTS FOR GROUP TRAINING INFO
 """
 
 
-async def test_create_grouptraining(client):
+async def test_create_grouptraining_info(client):
     response = await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Power Yoga Bootcamp",
             "price": 49.99,
@@ -358,15 +358,15 @@ async def test_create_grouptraining(client):
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json()["name"] == "Power Yoga Bootcamp"
 
-    response = await client.get(f"/group-trainings/{response.json()['id']}")
+    response = await client.get(f"/training-info/{response.json()['id']}")
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["name"] == "Power Yoga Bootcamp"
 
 
-async def test_create_grouptraining_without_name(client):
+async def test_create_grouptraining_info_without_name(client):
     response = await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "price": 49.99,
             "description": "High-intensity yoga for strength",
@@ -378,9 +378,9 @@ async def test_create_grouptraining_without_name(client):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
-async def test_get_all_grouptrainings(client):
+async def test_get_all_grouptrainings_info(client):
     await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Power Yoga Bootcamp",
             "price": 49.99,
@@ -390,7 +390,7 @@ async def test_get_all_grouptrainings(client):
         },
     )
     await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Prenatal Yoga",
             "price": 39.99,
@@ -400,15 +400,15 @@ async def test_get_all_grouptrainings(client):
         },
     )
 
-    response = await client.get("/group-trainings")
+    response = await client.get("/training-info")
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response.json(), list)
     assert len(response.json()) == 2
 
 
-async def test_get_single_grouptraining(client):
+async def test_get_single_grouptraining_info(client):
     response = await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Power Yoga Bootcamp",
             "price": 49.99,
@@ -422,15 +422,15 @@ async def test_get_single_grouptraining(client):
 
     group_training_id = response.json()["id"]
 
-    response = await client.get(f"/group-trainings/{group_training_id}")
+    response = await client.get(f"/training-info/{group_training_id}")
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["price"] == 49.99
 
 
-async def test_get_single_grouptraining_wrong_id(client):
+async def test_get_single_grouptraining_info_wrong_id(client):
     response = await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Power Yoga Bootcamp",
             "price": 49.99,
@@ -442,13 +442,13 @@ async def test_get_single_grouptraining_wrong_id(client):
 
     group_training_id = response.json()["id"]
 
-    response = await client.get(f"/group-trainings/{group_training_id+1}")
+    response = await client.get(f"/training-info/{group_training_id + 1}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-async def test_crete_group_training_with_float_at_duration(client):
+async def test_crete_group_training_with_float_info_at_duration(client):
     response = await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Power Yoga Bootcamp",
             "price": 49.99,
@@ -460,15 +460,15 @@ async def test_crete_group_training_with_float_at_duration(client):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
-    response = await client.get("/group-trainings")
+    response = await client.get("/training-info")
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response.json(), list)
     assert len(response.json()) == 0
 
 
-async def test_patch_group_training(client):
+async def test_patch_group_training_info(client):
     response = await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Power Yoga Bootcamp",
             "price": 49.99,
@@ -482,7 +482,7 @@ async def test_patch_group_training(client):
     group_training_id = response.json()["id"]
 
     response = await client.patch(
-        f"/group-trainings/{group_training_id}",
+        f"/training-info/{group_training_id}",
         json={
             "name": "PoweRRRR",
         },
@@ -490,15 +490,15 @@ async def test_patch_group_training(client):
 
     assert response.status_code == status.HTTP_200_OK
 
-    response = await client.get(f"/group-trainings/{group_training_id}")
+    response = await client.get(f"/training-info/{group_training_id}")
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["name"] == "PoweRRRR"
 
 
-async def test_patch_group_training_short_name(client):
+async def test_patch_group_training_info_short_name(client):
     response = await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Power Yoga Bootcamp",
             "price": 49.99,
@@ -512,7 +512,7 @@ async def test_patch_group_training_short_name(client):
     group_training_id = response.json()["id"]
 
     response = await client.patch(
-        f"/group-trainings/{group_training_id}",
+        f"/training-info/{group_training_id}",
         json={
             "name": "Po",
         },
@@ -520,15 +520,15 @@ async def test_patch_group_training_short_name(client):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
-    response = await client.get(f"/group-trainings/{group_training_id}")
+    response = await client.get(f"/training-info/{group_training_id}")
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json()["name"] == "Power Yoga Bootcamp"
 
 
-async def test_delete_group_training(client):
+async def test_delete_group_info_training(client):
     response = await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Power Yoga Bootcamp",
             "price": 49.99,
@@ -541,16 +541,16 @@ async def test_delete_group_training(client):
     assert response.status_code == status.HTTP_201_CREATED
 
     group_training_id = response.json()["id"]
-    response = await client.delete(f"/group-trainings/{group_training_id}")
+    response = await client.delete(f"/training-info/{group_training_id}")
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    response = await client.get(f"/group-trainings/{group_training_id}")
+    response = await client.get(f"/training-info/{group_training_id}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-async def test_delete_group_training_with_wrong_id(client):
+async def test_delete_group_training_info_with_wrong_id(client):
     response = await client.post(
-        "/group-trainings",
+        "/training-info",
         json={
             "name": "Power Yoga Bootcamp",
             "price": 49.99,
@@ -563,13 +563,13 @@ async def test_delete_group_training_with_wrong_id(client):
     assert response.status_code == status.HTTP_201_CREATED
 
     group_training_id = response.json()["id"]
-    response = await client.delete(f"/group-trainings/{group_training_id+1}")
+    response = await client.delete(f"/training-info/{group_training_id + 1}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    response = await client.get(f"/group-trainings/{group_training_id}")
+    response = await client.get(f"/training-info/{group_training_id}")
     assert response.status_code == status.HTTP_200_OK
 
-
+"""TEST FOR TRIP"""
 async def test_create_trip(client):
     response = await client.post(
         "/trips",
@@ -790,3 +790,383 @@ async def test_delete_trip_wrong_id(client):
     trip_id = response.json()["id"]
     del_response = await client.delete(f"/trips/{trip_id + 1}")
     assert del_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+"""TESTS FOR GROUP TRAINING INFO"""
+async def test_create_group_training(client):
+    response_group_info = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    response_studio = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response_group_training = await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio.json()['id'],
+                "training_info_id": response_group_info.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    assert response_group_training.status_code == status.HTTP_201_CREATED
+    assert response_group_training.json()['training_date'] == "2027-06-15T10:00:00"
+    assert response_group_training.json()['studio']['city'] == "Lviv"
+
+async def test_create_group_training_without_studio(client):
+    response_group_info = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+
+    response_group_training = await client.post(
+        "/group-training",
+        json={
+                "studio_id": 1,
+                "training_info_id": response_group_info.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    assert response_group_training.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_group_training.json()['detail'] == 'No studio found'
+
+async def test_create_group_training_without_training_info(client):
+    response_studio = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response_group_training = await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio.json()['id'],
+                "training_info_id": 1,
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    assert response_group_training.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_group_training.json()['detail'] == 'No training info found'
+
+async def test_get_all_group_trainings(client):
+    response_group_info_1 = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    response_group_info_2 = await client.post(
+        "/training-info",
+        json={
+            "name": "Prenatal Yoga",
+            "price": 39.99,
+            "description": "Safe yoga for expecting mothers",
+            "level": "Beginner",
+            "duration": 3,
+        },
+    )
+
+
+    response_studio_1 = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+    response_studio_2 = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+
+    await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio_1.json()['id'],
+                "training_info_id": response_group_info_1.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio_2.json()['id'],
+                "training_info_id": response_group_info_2.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    response = await client.get(
+        "/group-training",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), list)
+    assert len(response.json()) == 2
+    assert response.json()[0]['studio']['city'] == "Lviv"
+    assert response.json()[1]['training_info']['name'] == "Prenatal Yoga"
+
+
+async def test_get_single_group_training(client):
+    response_group_info = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    response_studio = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response_group_training_creation = await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio.json()['id'],
+                "training_info_id": response_group_info.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    response = await client.get(
+        f"/group-training/{response_group_training_creation.json()['id']}",
+    )
+
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()['training_date'] == "2027-06-15T10:00:00"
+    assert response.json()['studio']['city'] == "Lviv"
+
+async def test_get_single_group_training_wrong_id(client):
+    response_group_info = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    response_studio = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response_group_training_creation = await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio.json()['id'],
+                "training_info_id": response_group_info.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    response_group_id = response_group_training_creation.json()['id']
+    response = await client.get(
+        f"/group-training/{response_group_id+1}",
+    )
+
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()['detail'] == 'No training info found'
+
+async def test_patch_group_training(client):
+    response_group_info = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    response_studio = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response_group_training_creation = await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio.json()['id'],
+                "training_info_id": response_group_info.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    response = await client.patch(
+        f"/group-training/{response_group_training_creation.json()['id']}",
+        json={
+            "training_date": "2026-06-15T10:00:00"
+        }
+    )
+
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()['training_date'] == "2026-06-15T10:00:00"
+    assert response.json()['studio']['city'] == "Lviv"
+
+async def test_patch_group_training_wrong_id(client):
+    response_group_info = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    response_studio = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response_group_training_creation = await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio.json()['id'],
+                "training_info_id": response_group_info.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    response = await client.patch(
+        f"/group-training/{response_group_training_creation.json()['id'] +1}",
+        json={
+            "training_date": "2026-06-15T10:00:00"
+        }
+    )
+
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json()['detail'] == 'No training found'
+
+async def test_patch_group_training_time_in_past(client):
+    response_group_info = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    response_studio = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response_group_training_creation = await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio.json()['id'],
+                "training_info_id": response_group_info.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    response = await client.patch(
+        f"/group-training/{response_group_training_creation.json()['id']}",
+        json={
+            "training_date": "2025-06-15T10:00:00"
+        }
+    )
+
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+    assert response.json()['detail'][0]['msg'] == 'Value error, Time cannot be in the past'
+
+async def test_delete_group_training(client):
+    response_group_info = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    response_studio = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response_group_training_creation = await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio.json()['id'],
+                "training_info_id": response_group_info.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    response = await client.delete(
+        f"/group-training/{response_group_training_creation.json()['id']}"
+    )
+
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response_deleted_group_training = await client.delete(
+        f"/group-training/{response_group_training_creation.json()['id']}"
+    )
+    assert response_deleted_group_training.status_code == status.HTTP_404_NOT_FOUND
+
+async def test_delete_group_training_wrong_id(client):
+    response_group_info = await client.post(
+        "/training-info",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    response_studio = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response_group_training_creation = await client.post(
+        "/group-training",
+        json={
+                "studio_id": response_studio.json()['id'],
+                "training_info_id": response_group_info.json()['id'],
+                "training_date": "2027-06-15T10:00:00"
+        }
+    )
+
+    response = await client.delete(
+        f"/group-training/{response_group_training_creation.json()['id'] + 1}"
+    )
+
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
