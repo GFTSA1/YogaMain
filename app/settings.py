@@ -1,0 +1,24 @@
+from functools import lru_cache
+from pydantic import PostgresDsn
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file="./.env", extra="ignore")
+
+    database_url: PostgresDsn
+
+    aws_access_key_id: str
+    aws_secret_access_key: str
+    aws_bucket_name: str
+
+    # cloudfront_key_pair_id: str
+    # cloudfront_private_key_path: str
+
+
+@lru_cache
+def get_settings():
+    return Settings()
+
+
+settings = get_settings()
