@@ -17,7 +17,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"city\": \"New York\",\n  \"capacity\": 30,\n  \"address\": \"123 Broadway St, Manhattan, NY 10001\"\n}",
+							"raw": "{\n  \"city\": \"Kyiv\",\n  \"capacity\": 30,\n  \"address\": \"Khreshatyk, 1, Kyiv\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -100,12 +100,12 @@
 							"raw": "{\n  \"city\": \"Kyiv\"\n}"
 						},
 						"url": {
-							"raw": "{{URL}}studios/1",
+							"raw": "{{URL}}studios/7",
 							"host": [
 								"{{URL}}studios"
 							],
 							"path": [
-								"1"
+								"7"
 							]
 						}
 					},
@@ -129,9 +129,9 @@
 							"raw": "{\n  \"city\": \"Kyiv\"\n}"
 						},
 						"url": {
-							"raw": "{{URL}}group-trainings",
+							"raw": "{{URL}}training-info",
 							"host": [
-								"{{URL}}group-trainings"
+								"{{URL}}training-info"
 							]
 						}
 					},
@@ -144,7 +144,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"level\": \"Beginner\",\n  \"name\": \"Morning Flow\",\n  \"description\": \"A gentle yoga session to start your day.\",\n  \"duration\": 60,\n  \"price\": 19.99\n}",
+							"raw": "{\n  \"name\": \"Power Vinyasa\",\n  \"price\": 34.99,\n  \"description\": \"High intensity flow for experienced practitioners.\",\n  \"level\": \"Advance\",\n  \"duration\": 90\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -152,9 +152,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{URL}}group-trainings",
+							"raw": "{{URL}}training-info",
 							"host": [
-								"{{URL}}group-trainings"
+								"{{URL}}training-info"
 							]
 						}
 					},
@@ -173,9 +173,9 @@
 							"raw": "{\n  \"level\": \"Beginner\",\n  \"name\": \"Morning Flow\",\n  \"description\": \"A gentle yoga session to start your day.\",\n  \"duration\": 60,\n  \"price\": 19.99\n}"
 						},
 						"url": {
-							"raw": "{{URL}}group-trainings/1",
+							"raw": "{{URL}}training-info/1",
 							"host": [
-								"{{URL}}group-trainings"
+								"{{URL}}training-info"
 							],
 							"path": [
 								"1"
@@ -185,7 +185,7 @@
 					"response": []
 				},
 				{
-					"name": "New Request",
+					"name": "Update training info",
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -220,9 +220,122 @@
 							"raw": "{\n    \"price\": 10.00\n}"
 						},
 						"url": {
-							"raw": "{{URL}}group-trainings/1",
+							"raw": "{{URL}}training-info/1",
 							"host": [
-								"{{URL}}group-trainings"
+								"{{URL}}training-info"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Group Training",
+			"item": [
+				{
+					"name": "Get all group trainings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}group-training",
+							"host": [
+								"{{URL}}group-training"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Group Training",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studio_id\": 8,\n  \"training_info_id\": 2,\n  \"training_date\": \"2027-06-15T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}group-training",
+							"host": [
+								"{{URL}}group-training"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve One Training",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studio_id\": 8,\n  \"training_info_id\": 2,\n  \"training_date\": \"2027-06-15T10:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{URL}}group-training/1",
+							"host": [
+								"{{URL}}group-training"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Training",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"training_date\": \"2026-06-15T10:00:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}group-training/1",
+							"host": [
+								"{{URL}}group-training"
+							],
+							"path": [
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Group Training",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studio_id\": 8,\n  \"training_info_id\": 2,\n  \"training_date\": \"2027-06-15T10:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{URL}}group-training/1",
+							"host": [
+								"{{URL}}group-training"
 							],
 							"path": [
 								"1"
@@ -253,14 +366,6 @@
 						"{{URL}}courses"
 					]
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "New Request",
-			"request": {
-				"method": "GET",
-				"header": []
 			},
 			"response": []
 		}
