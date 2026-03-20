@@ -1,4 +1,10 @@
+from http.client import responses
+
 from fastapi import status
+
+"""
+TESTS FOR COURSES
+"""
 
 
 async def test_create_course(client):
@@ -198,6 +204,372 @@ async def test_delete_course(client):
     assert check_response.status_code == status.HTTP_404_NOT_FOUND
 
 
+"""
+TESTS FOR STUDIOS
+"""
+
+
+async def test_get_studios(client):
+    await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+
+    await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    response = await client.get("/studios")
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), list)
+    assert len(response.json()) == 2
+
+
+async def test_create_studio(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
+    )
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["city"] == "Lviv"
+
+
+async def test_studio_creation_wrong_data(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Lviv", "address": "Rynok Square 1, Lviv 79000"},
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_get_single_studio(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+    studio_id = response.json()["id"]
+    response = await client.get(f"/studios/{studio_id}")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), dict)
+    assert response.json()["city"] == "Kyiv"
+
+
+async def test_patch_studio(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.patch(f"/studios/{studio_id}", json={"city": "New York"})
+
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), dict)
+    assert response.json()["city"] == "New York"
+
+
+async def test_patch_studio_wrong_data(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.patch(f"/studios/{studio_id}", json={"street": "Gaga 11"})
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+    response = await client.get(
+        f"/studios/{studio_id}",
+    )
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["city"] == "Kyiv"
+    assert response.json().get("street") == None
+
+
+async def test_patch_studio_wrong_data_id(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.patch(f"/studios/{studio_id + 1}", json={"city": "Jojo"})
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    response = await client.get(
+        f"/studios/{studio_id}",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["city"] == "Kyiv"
+
+
+async def test_delete_studio(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.delete(f"/studios/{studio_id}")
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = await client.get(f"/studios/{studio_id}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+async def test_delete_studio_wrong_id(client):
+    response = await client.post(
+        "/studios",
+        json={"city": "Kyiv", "capacity": 30, "address": "Khreshchatyk 1, Kyiv 01001"},
+    )
+
+    studio_id = response.json()["id"]
+    response = await client.delete(f"/studios/{studio_id + 1}")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    response = await client.get(f"/studios/{studio_id}")
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["city"] == "Kyiv"
+
+
+"""
+TESTS FOR GROUP TRAINING INFO
+"""
+
+
+async def test_create_grouptraining(client):
+    response = await client.post(
+        "/group-trainings",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["name"] == "Power Yoga Bootcamp"
+
+    response = await client.get(f"/group-trainings/{response.json()['id']}")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["name"] == "Power Yoga Bootcamp"
+
+
+async def test_create_grouptraining_without_name(client):
+    response = await client.post(
+        "/group-trainings",
+        json={
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def test_get_all_grouptrainings(client):
+    await client.post(
+        "/group-trainings",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+    await client.post(
+        "/group-trainings",
+        json={
+            "name": "Prenatal Yoga",
+            "price": 39.99,
+            "description": "Safe yoga for expecting mothers",
+            "level": "Beginner",
+            "duration": 3,
+        },
+    )
+
+    response = await client.get("/group-trainings")
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), list)
+    assert len(response.json()) == 2
+
+
+async def test_get_single_grouptraining(client):
+    response = await client.post(
+        "/group-trainings",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    group_training_id = response.json()["id"]
+
+    response = await client.get(f"/group-trainings/{group_training_id}")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["price"] == 49.99
+
+
+async def test_get_single_grouptraining_wrong_id(client):
+    response = await client.post(
+        "/group-trainings",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+
+    group_training_id = response.json()["id"]
+
+    response = await client.get(f"/group-trainings/{group_training_id+1}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+async def test_crete_group_training_with_float_at_duration(client):
+    response = await client.post(
+        "/group-trainings",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8.5,
+        },
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+    response = await client.get("/group-trainings")
+    assert response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), list)
+    assert len(response.json()) == 0
+
+
+async def test_patch_group_training(client):
+    response = await client.post(
+        "/group-trainings",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    group_training_id = response.json()["id"]
+
+    response = await client.patch(
+        f"/group-trainings/{group_training_id}",
+        json={
+            "name": "PoweRRRR",
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    response = await client.get(f"/group-trainings/{group_training_id}")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["name"] == "PoweRRRR"
+
+
+async def test_patch_group_training_short_name(client):
+    response = await client.post(
+        "/group-trainings",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    group_training_id = response.json()["id"]
+
+    response = await client.patch(
+        f"/group-trainings/{group_training_id}",
+        json={
+            "name": "Po",
+        },
+    )
+
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+    response = await client.get(f"/group-trainings/{group_training_id}")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["name"] == "Power Yoga Bootcamp"
+
+
+async def test_delete_group_training(client):
+    response = await client.post(
+        "/group-trainings",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    group_training_id = response.json()["id"]
+    response = await client.delete(f"/group-trainings/{group_training_id}")
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    response = await client.get(f"/group-trainings/{group_training_id}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+async def test_delete_group_training_with_wrong_id(client):
+    response = await client.post(
+        "/group-trainings",
+        json={
+            "name": "Power Yoga Bootcamp",
+            "price": 49.99,
+            "description": "High-intensity yoga for strength",
+            "level": "Advance",
+            "duration": 8,
+        },
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    group_training_id = response.json()["id"]
+    response = await client.delete(f"/group-trainings/{group_training_id+1}")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    response = await client.get(f"/group-trainings/{group_training_id}")
+    assert response.status_code == status.HTTP_200_OK
+
+
 async def test_create_trip(client):
     response = await client.post(
         "/trips",
@@ -262,7 +634,7 @@ async def test_get_all_trips(client):
 
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(data, list)
-    assert len(data) > 1
+    assert len(data) == 2
     assert data[0]["name"] == "Test Name"
 
 
@@ -302,7 +674,7 @@ async def test_get_trip_not_found(client):
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-async def test_update_trip(client):
+async def test_patch_trip(client):
     response = await client.post(
         "/trips",
         json={
@@ -317,23 +689,14 @@ async def test_update_trip(client):
 
     update_response = await client.patch(
         f"/trips/{trips_id}",
-        json={
-            "name": "New Name",
-            "description": "Test description new",
-            "location": "Test location new",
-            "start_date": "2026-06-15T10:00:00Z",
-            "end_date": "2026-06-18T10:00:00Z",
-        },
+        json={"name": "New Name"},
     )
     assert update_response.status_code == status.HTTP_200_OK
+    assert isinstance(response.json(), dict)
     assert update_response.json()["name"] == "New Name"
-    assert update_response.json()["description"] == "Test description new"
-    assert update_response.json()["location"] == "Test location new"
-    assert update_response.json()["start_date"].startswith("2026-06-15T10:00:00")
-    assert update_response.json()["end_date"].startswith("2026-06-18T10:00:00")
 
 
-async def test_trip_update_wrong_data(client):
+async def test_trip_patch_wrong_data(client):
     response = await client.post(
         "/trips",
         json={
@@ -364,7 +727,7 @@ async def test_trip_update_wrong_data(client):
     assert current_data["name"] == "Test Name"
 
 
-async def test_update_wrong_trip_id(client):
+async def test_patch_wrong_trip_id(client):
     response = await client.post(
         "/trips",
         json={
@@ -411,3 +774,19 @@ async def test_delete_trip(client):
 
     check_response = await client.get(f"/trips/{trip_id}")
     assert check_response.status_code == status.HTTP_404_NOT_FOUND
+
+
+async def test_delete_trip_wrong_id(client):
+    response = await client.post(
+        "/trips",
+        json={
+            "name": "Test Name",
+            "description": "Test Description",
+            "location": "Test Location",
+            "start_date": "2026-06-15T10:00:00Z",
+            "end_date": "2026-06-16T10:00:00Z",
+        },
+    )
+    trip_id = response.json()["id"]
+    del_response = await client.delete(f"/trips/{trip_id + 1}")
+    assert del_response.status_code == status.HTTP_404_NOT_FOUND

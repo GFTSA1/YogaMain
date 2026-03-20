@@ -5,7 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from ..database import get_session
 from ..models import Trip
-from ..schema import TripModel
+from ..schema import TripModel, TripPatchModel
 
 
 trips_router = APIRouter(prefix="/trips", tags=["Trips"])
@@ -37,19 +37,23 @@ async def get_trip(
 ) -> Trip:
     trip = await session.get(Trip, trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="Trip not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found"
+        )
     return trip
 
 
 @trips_router.patch("/{trip_id}", response_model=Trip, status_code=status.HTTP_200_OK)
 async def update_trip(
     trip_id: int,
-    data: TripModel,
+    data: TripPatchModel,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Trip:
     trip = await session.get(Trip, trip_id)
     if not trip:
-        raise HTTPException(status_code=404, detail="Trip not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found"
+        )
 
     trip_update = data.model_dump(exclude_unset=True)
 
@@ -67,7 +71,9 @@ async def delete_trip(
     trip = await session.get(Trip, trip_id)
 
     if not trip:
-        raise HTTPException(status_code=404, detail="Trip not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found"
+        )
 
     await session.delete(trip)
     await session.commit()

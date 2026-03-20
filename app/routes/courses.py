@@ -5,7 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from ..database import get_session
 from ..models import YogaCourse
-from ..schema import YogaCourseModel
+from ..schema import YogaCourseModel, YogaCoursePatchModel
 
 
 courses_router = APIRouter(prefix="/courses", tags=["Courses"])
@@ -39,7 +39,9 @@ async def get_course(
 ) -> YogaCourse:
     course = await session.get(YogaCourse, course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
+        )
     return course
 
 
@@ -48,12 +50,14 @@ async def get_course(
 )
 async def update_course(
     course_id: int,
-    data: YogaCourseModel,
+    data: YogaCoursePatchModel,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> YogaCourse:
     course = await session.get(YogaCourse, course_id)
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
+        )
 
     course_update = data.model_dump(exclude_unset=True)
 
@@ -71,7 +75,9 @@ async def delete_course(
     course = await session.get(YogaCourse, course_id)
 
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
+        )
 
     await session.delete(course)
     await session.commit()
