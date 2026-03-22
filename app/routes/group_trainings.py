@@ -1,9 +1,6 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
 
-from ..database import get_session
 from ..models import GroupTrainingStudio, GroupTrainingInfo, Studio
 from ..schema import (
     GroupTrainingStudioInputModel,
@@ -12,6 +9,7 @@ from ..schema import (
     StudioModel,
     GroupTrainingModel,
 )
+from ..dependencies import SessionDep
 
 group_training_router = APIRouter(
     prefix="/group-training",
@@ -20,7 +18,7 @@ group_training_router = APIRouter(
 
 
 @group_training_router.get("", response_model=list[GroupTrainingStudioResponseModel])
-async def get_group_training_studio(session: AsyncSession = Depends(get_session)):
+async def get_group_training_studio(session: SessionDep):
     statement = (
         select(GroupTrainingInfo, Studio, GroupTrainingStudio)
         .join(
@@ -52,11 +50,12 @@ async def get_group_training_studio(session: AsyncSession = Depends(get_session)
 
 
 @group_training_router.post(
-    "", status_code=status.HTTP_201_CREATED, response_model=GroupTrainingStudioResponseModel
+    "",
+    status_code=status.HTTP_201_CREATED,
+    response_model=GroupTrainingStudioResponseModel,
 )
 async def create_group_training_studio(
-    data: GroupTrainingStudioInputModel,
-    session: AsyncSession = Depends(get_session),
+    data: GroupTrainingStudioInputModel, session: SessionDep
 ):
     training_info = await session.get(GroupTrainingInfo, data.training_info_id)
     if not training_info:
@@ -71,7 +70,6 @@ async def create_group_training_studio(
         )
 
     group_training = GroupTrainingStudio.model_validate(data)
-
 
     session.add(group_training)
     await session.commit()
@@ -113,10 +111,7 @@ async def create_group_training_studio(
     response_model=GroupTrainingStudioResponseModel,
     status_code=status.HTTP_200_OK,
 )
-async def get_group_training_studio(
-    training_id: int,
-    session: AsyncSession = Depends(get_session),
-):
+async def get_group_training_studio(training_id: int, session: SessionDep):
 
     statement = (
         select(GroupTrainingInfo, GroupTrainingStudio, Studio)
@@ -154,15 +149,20 @@ async def get_group_training_studio(
         training_date=training.training_date,
     )
 
-@group_training_router.patch(path='/{training_id}', response_model=GroupTrainingStudioResponseModel, status_code=status.HTTP_200_OK)
+
+@group_training_router.patch(
+    path="/{training_id}",
+    response_model=GroupTrainingStudioResponseModel,
+    status_code=status.HTTP_200_OK,
+)
 async def patch_group_training(
-    training_id: int,
-    data: GroupTrainingStudioPatchModel,
-    session: AsyncSession = Depends(get_session),
+    training_id: int, data: GroupTrainingStudioPatchModel, session: SessionDep
 ):
     group_training = await session.get(GroupTrainingStudio, training_id)
     if not group_training:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No training found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No training found"
+        )
 
     group_training_changes = data.model_dump()
     if not group_training_changes:
@@ -175,8 +175,10 @@ async def patch_group_training(
     await session.commit()
     statement = (
         select(GroupTrainingInfo, GroupTrainingStudio, Studio)
-        .join(GroupTrainingStudio,
-              GroupTrainingStudio.training_info_id == GroupTrainingInfo.id)
+        .join(
+            GroupTrainingStudio,
+            GroupTrainingStudio.training_info_id == GroupTrainingInfo.id,
+        )
         .join(Studio, Studio.id == GroupTrainingStudio.studio_id)
         .where(GroupTrainingStudio.id == training_id)
     )
@@ -199,14 +201,16 @@ async def patch_group_training(
         training_date=training.training_date,
     )
 
-@group_training_router.delete(path='/{training_id}', status_code=status.HTTP_204_NO_CONTENT)
-async def delete_group_training(
-        training_id: int,
-        session: AsyncSession = Depends(get_session),
-):
+
+@group_training_router.delete(
+    path="/{training_id}", status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_group_training(training_id: int, session: SessionDep):
     group_training = await session.get(GroupTrainingStudio, training_id)
     if not group_training:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No training found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No training found"
+        )
 
     await session.delete(group_training)
     await session.commit()

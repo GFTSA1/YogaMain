@@ -1,20 +1,16 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
 
-from ..database import get_session
 from ..models import Trip
 from ..schema import TripModel, TripPatchModel
+from ..dependencies import SessionDep
 
 
 trips_router = APIRouter(prefix="/trips", tags=["Trips"])
 
 
 @trips_router.post("", response_model=Trip, status_code=status.HTTP_201_CREATED)
-async def create_trip(
-    data: TripModel, session: Annotated[AsyncSession, Depends(get_session)]
-) -> Trip:
+async def create_trip(data: TripModel, session: SessionDep) -> Trip:
     trip = Trip.model_validate(data)
 
     session.add(trip)
@@ -25,16 +21,14 @@ async def create_trip(
 
 @trips_router.get("", response_model=list[Trip], status_code=status.HTTP_200_OK)
 async def get_all_trips(
-    session: Annotated[AsyncSession, Depends(get_session)],
+    session: SessionDep,
 ) -> list[Trip]:
     trips = (await session.exec(select(Trip))).all()
     return trips
 
 
 @trips_router.get("/{trip_id}", response_model=Trip, status_code=status.HTTP_200_OK)
-async def get_trip(
-    trip_id: int, session: Annotated[AsyncSession, Depends(get_session)]
-) -> Trip:
+async def get_trip(trip_id: int, session: SessionDep) -> Trip:
     trip = await session.get(Trip, trip_id)
     if not trip:
         raise HTTPException(
@@ -44,11 +38,7 @@ async def get_trip(
 
 
 @trips_router.patch("/{trip_id}", response_model=Trip, status_code=status.HTTP_200_OK)
-async def update_trip(
-    trip_id: int,
-    data: TripPatchModel,
-    session: Annotated[AsyncSession, Depends(get_session)],
-) -> Trip:
+async def update_trip(trip_id: int, data: TripPatchModel, session: SessionDep) -> Trip:
     trip = await session.get(Trip, trip_id)
     if not trip:
         raise HTTPException(
@@ -65,9 +55,7 @@ async def update_trip(
 
 
 @trips_router.delete("/{trip_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_trip(
-    trip_id: int, session: Annotated[AsyncSession, Depends(get_session)]
-) -> None:
+async def delete_trip(trip_id: int, session: SessionDep) -> None:
     trip = await session.get(Trip, trip_id)
 
     if not trip:

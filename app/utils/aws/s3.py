@@ -1,6 +1,6 @@
+from loguru import logger
 from typing import BinaryIO
 from botocore.exceptions import ClientError
-from loguru import logger
 
 from app.settings import settings
 
