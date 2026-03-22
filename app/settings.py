@@ -12,8 +12,9 @@ class Settings(BaseSettings):
     aws_secret_access_key: str
     aws_bucket_name: str
 
-    # cloudfront_key_pair_id: str
-    # cloudfront_private_key_path: str
+    cloudfront_domain: str
+    cloudfront_key_id: str
+    cloudfront_private_key_path: str
 
 
 @lru_cache

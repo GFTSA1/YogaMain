@@ -1,1 +1,1 @@
-from .s3 import S3Service
+from .aws import S3Service, CloudFrontService

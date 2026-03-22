@@ -1,22 +1,17 @@
-import os
-import boto3
+from typing import BinaryIO
 from botocore.exceptions import ClientError
-from dotenv import load_dotenv
 from loguru import logger
 
-load_dotenv()
+from app.settings import settings
 
 
 class S3Service:
-    def __init__(self):
-        self.client = boto3.client(
-            "s3",
-            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
-            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
-        )
-        self.bucket_name = os.getenv("AWS_BUCKET_NAME")
+    def __init__(self, client):
 
-    def upload_file(self, file_object, content_type: str, object_name: str):
+        self.client = client
+        self.bucket_name = settings.aws_bucket_name
+
+    def upload_file(self, file_object: BinaryIO, content_type: str, object_name: str):
         if not object_name:
             raise ValueError("object_name is required")
 

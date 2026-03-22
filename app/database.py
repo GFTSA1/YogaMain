@@ -2,6 +2,7 @@ import ssl
 
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.settings import settings
 
 
