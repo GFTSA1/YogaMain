@@ -1,5 +1,6 @@
 import boto3
 
+from typing import Annotated
 from fastapi import Depends
 from functools import lru_cache
 from botocore.config import Config
@@ -24,3 +25,6 @@ def get_s3_client():
 
 def get_s3_service(client=Depends(get_s3_client)):
     return S3Service(client)
+
+
+S3ServiceDep = Annotated[S3Service, Depends(get_s3_service)]

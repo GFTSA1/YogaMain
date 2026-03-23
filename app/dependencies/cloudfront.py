@@ -1,3 +1,5 @@
+from typing import Annotated
+from fastapi import Depends
 from functools import lru_cache
 
 from ..utils import CloudFrontService, load_private_key
@@ -11,3 +13,5 @@ def get_cloudfront_service() -> CloudFrontService:
         key_id=settings.cloudfront_key_id,
         private_key=load_private_key()
     )
+
+Get_Cloudfront_Dep = Annotated[CloudFrontService, Depends(get_cloudfront_service)]
