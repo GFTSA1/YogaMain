@@ -1,6 +1,9 @@
+import asyncio
+
 from loguru import logger
 from typing import BinaryIO
 from botocore.exceptions import ClientError
+from concurrent.futures import ThreadPoolExecutor
 
 from app.settings import settings
 
@@ -10,30 +13,42 @@ class S3Service:
 
         self.client = client
         self.bucket_name = settings.aws_bucket_name
+        self.executor = ThreadPoolExecutor(max_workers=5)
 
-    def upload_file(self, file_object: BinaryIO, content_type: str, object_name: str):
-        if not object_name:
-            raise ValueError("object_name is required")
+    def _upload_sync(self, file_object: BinaryIO, content_type: str, object_name: str):
+        self.client.upload_fileobj(
+            file_object,
+            self.bucket_name,
+            object_name,
+            ExtraArgs={"ContentType": content_type},
+        )
 
-        if content_type not in {"video/mp4", "video/webm"}:
-            raise ValueError("Invalid content type")
-
+    async def upload_file(
+        self, file_object, content_type: str, object_name: str
+    ) -> bool:
         try:
-            self.client.upload_fileobj(
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(
+                self.executor,
+                self._upload_sync,
                 file_object,
-                self.bucket_name,
+                content_type,
                 object_name,
-                ExtraArgs={"ContentType": content_type},
             )
             return True
+
         except ClientError as e:
-            logger.error("S3 upload error {}", e)
+            logger.error("S3 upload error: {}", e)
             return False
 
-    def delete_file(self, object_name: str):
+    def delete_file(self, object_name: str) -> bool:
         try:
-            self.client.delete_object(Bucket=self.bucket_name, Key=object_name)
+            self.client.delete_object(
+                Bucket=self.bucket_name,
+                Key=object_name,
+            )
             return True
+
         except ClientError as e:
-            logger.error("S3 delete error {}", e)
+            logger.error("S3 delete error: {}", e)
             return False
