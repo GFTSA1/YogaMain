@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
 from ..models import Trip
-from ..schema import TripModel, TripPatchModel
+from ..schemas import TripModel, TripPatchModel
 from ..dependencies import SessionDep
 
 

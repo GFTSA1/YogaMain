@@ -108,6 +108,7 @@ class GroupTrainingStudioResponseModel(SQLModel):
 
 class GroupTrainingStudioPatchModel(SQLModel):
     training_date: datetime
+
     @field_validator("training_date")
     @classmethod
     def date_must_be_future(cls, value):
@@ -117,5 +118,9 @@ class GroupTrainingStudioPatchModel(SQLModel):
 
 
 class VideoModel(SQLModel):
-    title: str = Field(min_length=4, unique=True)
-    link: str = Field(unique=True)
+    id: int
+    title: str
+    course_id: int
+    duration_seconds: Optional[int]
+    is_active: bool
+    cdn_url: str

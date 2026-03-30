@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
 from ..models import GroupTrainingStudio, GroupTrainingInfo, Studio
-from ..schema import (
+from ..schemas import (
     GroupTrainingStudioInputModel,
     GroupTrainingStudioPatchModel,
     GroupTrainingStudioResponseModel,

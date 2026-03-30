@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
 from ..models import YogaCourse
-from ..schema import YogaCourseModel, YogaCoursePatchModel
+from ..schemas import YogaCourseModel, YogaCoursePatchModel
 from ..dependencies import SessionDep
 
 

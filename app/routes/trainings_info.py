@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
 from ..models import GroupTrainingInfo
-from ..schema import GroupTrainingModel, GroupTrainingPatchModel
+from ..schemas import GroupTrainingModel, GroupTrainingPatchModel
 from ..dependencies import SessionDep
 
 training_info_router = APIRouter(prefix="/training-info", tags=["Trainings-info"])

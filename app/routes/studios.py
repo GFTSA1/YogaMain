@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
 from ..models import Studio
-from ..schema import StudioModel, StudioPatchModel
+from ..schemas import StudioModel, StudioPatchModel
 from ..dependencies import SessionDep
 
 studio_router = APIRouter(prefix="/studios", tags=["Studios"])
