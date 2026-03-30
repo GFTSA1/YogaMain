@@ -14,4 +14,4 @@ def get_cloudfront_service() -> CloudFrontService:
         private_key=load_private_key()
     )
 
-Get_Cloudfront_Dep = Annotated[CloudFrontService, Depends(get_cloudfront_service)]
+CloudfrontDep = Annotated[CloudFrontService, Depends(get_cloudfront_service)]

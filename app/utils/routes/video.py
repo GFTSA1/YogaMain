@@ -6,19 +6,20 @@ from fastapi import HTTPException, status, UploadFile
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
+from ..aws.cloudfront import CloudFrontService
 from ...models import Video, YogaCourse
 from ...schemas import VideoModel
 from ...settings import settings
 
 
-def to_video_response(video: Video) -> VideoModel:
+def to_video_response(video: Video, cloudfront: CloudFrontService) -> VideoModel:
     return VideoModel(
         id=video.id,
         title=video.title,
         course_id=video.yoga_course_id,
         duration_seconds=video.duration_seconds,
         is_active=video.is_active,
-        cdn_url=f"{settings.cloudfront_domain}/{video.s3_key}",
+        url=cloudfront.generate_signed_url(video.s3_key, 3600),
     )
 
 

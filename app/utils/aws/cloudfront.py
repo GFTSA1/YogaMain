@@ -4,8 +4,6 @@ from datetime import datetime, timedelta, timezone
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 
-from app.settings import settings
-
 
 class CloudFrontService:
     def __init__(self, domain: str, key_id: str, private_key: str):

@@ -123,4 +123,4 @@ class VideoModel(SQLModel):
     course_id: int
     duration_seconds: Optional[int]
     is_active: bool
-    cdn_url: str
+    url: str

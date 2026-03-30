@@ -9,8 +9,8 @@ from ..database import get_session
 from ..models import Video, YogaCourse
 from ..schemas import VideoModel
 from ..settings import settings
-from ..utils import VideoService, FileValidator, to_video_response
-from ..dependencies import SessionDep, S3ServiceDep
+from ..utils import VideoService, FileValidator, to_video_response, CloudFrontService
+from ..dependencies import SessionDep, S3ServiceDep, CloudfrontDep
 
 videos_router = APIRouter(prefix="/video", tags=["Video"])
 
@@ -44,12 +44,14 @@ async def upload_video(
 
 
 @videos_router.get(
-    "",
+    "/courses/{course_id}/videos/",
     response_model=list[VideoModel],
+    status_code=status.HTTP_200_OK,
 )
 async def get_videos(
-    session: SessionDep,
-    course_id: Optional[int] = Query(default=None),
+    course_id: int,
+    session: SessionDep = SessionDep,
+    cloudfront: CloudfrontDep = CloudfrontDep,
     is_active: Optional[bool] = Query(default=None),
 ):
     videos = await VideoService.get_list(
@@ -58,17 +60,7 @@ async def get_videos(
         is_active=is_active,
     )
 
-    return [
-        VideoModel(
-            id=v.id,
-            title=v.title,
-            course_id=v.yoga_course_id,
-            duration_seconds=v.duration_seconds,
-            is_active=v.is_active,
-            cdn_url=f"{settings.cloudfront_domain}/{v.s3_key}",
-        )
-        for v in videos
-    ]
+    return [to_video_response(v, cloudfront) for v in videos]
 
 
 @videos_router.get(
@@ -79,7 +71,21 @@ async def get_video(
     course_id: int,
     video_id: int,
     session: SessionDep,
+    cloudfront: CloudfrontDep,
 ):
     video = await VideoService.get_by_id_and_course(session, video_id, course_id)
+    return to_video_response(video, cloudfront)
 
-    return to_video_response(video)
+
+@videos_router.patch(
+    "/courses/{course_id}/videos/{video_id}",
+    response_model=VideoModel,
+    status_code=status.HTTP_200_OK,
+)
+async def update_video(course_id: int, video_id: int, session: SessionDep):
+    pass
+
+
+@videos_router.delete("/courses/{course_id}/videos/{video_id}")
+async def delete_video(course_id: int, video_id: int, session: SessionDep):
+    video = await VideoService.get_by_id_and_course(session, video_id, course_id)
