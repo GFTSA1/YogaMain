@@ -9,7 +9,7 @@ from ..database import get_session
 from ..models import Video, YogaCourse
 from ..schemas import VideoModel
 from ..settings import settings
-from ..utils import VideoService, to_video_response
+from ..utils import VideoService, FileValidator, to_video_response
 from ..dependencies import SessionDep, S3ServiceDep
 
 videos_router = APIRouter(prefix="/video", tags=["Video"])
@@ -24,7 +24,7 @@ async def upload_video(
     file: UploadFile = File(...),
 ):
 
-    ext = VideoService.validate_file(file)
+    ext = FileValidator.validate_video(file)
 
     await VideoService.ensure_course_exists(session, course_id)
     await VideoService.ensure_unique_title(session, title, course_id)

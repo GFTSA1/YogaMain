@@ -1,1 +1,1 @@
-from .video import VideoService, to_video_response
+from .video import VideoService, FileValidator, to_video_response

@@ -2,7 +2,7 @@ import os
 import uuid
 import asyncio
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
@@ -26,10 +26,9 @@ ALLOWED_TYPES = {"video/mp4", "video/webm"}
 ALLOWED_EXT = {".mp4", ".webm"}
 
 
-class VideoService:
-
+class FileValidator:
     @staticmethod
-    def validate_file(file):
+    def validate_video(file: UploadFile) -> str:
         if file.content_type not in ALLOWED_TYPES:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -38,6 +37,9 @@ class VideoService:
 
         ext = os.path.splitext(file.filename or "")[1].lower()
         return ext if ext in ALLOWED_EXT else ".mp4"
+
+
+class VideoService:
 
     @staticmethod
     async def ensure_course_exists(session, course_id: int):
@@ -70,9 +72,9 @@ class VideoService:
         file_id = uuid.uuid4()
         object_name = f"videos/{file_id}{ext}"
 
-        ok = await s3.upload_file(file.file, file.content_type, object_name)
+        valid_video = await s3.upload_file(file.file, file.content_type, object_name)
 
-        if not ok:
+        if not valid_video:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Upload failed",
