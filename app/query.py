@@ -103,6 +103,19 @@ class Mutation:
 
         return training_info
 
+    @strawberry.mutation
+    async def delete_group_info(self, training_id:int, info: Info) -> bool:
+        session = info.context.session
+        training_info = await session.get(GroupTrainingInfo, training_id)
+
+        if training_info is None:
+            raise ValueError(
+                "Training Info not found"
+            )
+
+        await session.delete(training_info)
+        await session.commit()
+        return True
 
 schema = strawberry.Schema(query=Query, mutation=Mutation)
 
