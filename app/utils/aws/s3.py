@@ -41,11 +41,15 @@ class S3Service:
             logger.error("S3 upload error: {}", e)
             return False
 
-    def delete_file(self, object_name: str) -> bool:
+    async def delete_file(self, object_name: str) -> bool:
         try:
-            self.client.delete_object(
-                Bucket=self.bucket_name,
-                Key=object_name,
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(
+                self.executor,
+                lambda: self.client.delete_object(
+                    Bucket=self.bucket_name,
+                    Key=object_name,
+                ),
             )
             return True
 

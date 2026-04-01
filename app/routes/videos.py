@@ -12,15 +12,15 @@ from ..settings import settings
 from ..utils import VideoService, FileValidator, to_video_response, CloudFrontService
 from ..dependencies import SessionDep, S3ServiceDep, CloudfrontDep
 
-videos_router = APIRouter(prefix="/video", tags=["Video"])
+videos_router = APIRouter(prefix="/courses/{course_id}/videos", tags=["Video"])
 
 
 @videos_router.post("", response_model=VideoModel, status_code=status.HTTP_201_CREATED)
 async def upload_video(
+    course_id: int,
     session: SessionDep,
     s3: S3ServiceDep,
     title: str = Form(...),
-    course_id: int = Form(...),
     file: UploadFile = File(...),
 ):
 
@@ -44,7 +44,7 @@ async def upload_video(
 
 
 @videos_router.get(
-    "/courses/{course_id}/videos/",
+    "",
     response_model=list[VideoModel],
     status_code=status.HTTP_200_OK,
 )
@@ -64,7 +64,7 @@ async def get_videos(
 
 
 @videos_router.get(
-    "/courses/{course_id}/videos/{video_id}",
+    "/{video_id}",
     response_model=VideoModel,
 )
 async def get_video(
@@ -78,7 +78,7 @@ async def get_video(
 
 
 @videos_router.patch(
-    "/courses/{course_id}/videos/{video_id}",
+    "/{video_id}",
     response_model=VideoModel,
     status_code=status.HTTP_200_OK,
 )
@@ -86,6 +86,10 @@ async def update_video(course_id: int, video_id: int, session: SessionDep):
     pass
 
 
-@videos_router.delete("/courses/{course_id}/videos/{video_id}")
-async def delete_video(course_id: int, video_id: int, session: SessionDep):
+@videos_router.delete("/{video_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_video(
+    course_id: int, video_id: int, session: SessionDep, s3: S3ServiceDep
+):
     video = await VideoService.get_by_id_and_course(session, video_id, course_id)
+    
+    await VideoService.delete_video(session, video, s3)

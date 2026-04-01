@@ -6,7 +6,7 @@ from fastapi import HTTPException, status, UploadFile
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
-from ..aws.cloudfront import CloudFrontService
+from ..aws import CloudFrontService, S3Service
 from ...models import Video, YogaCourse
 from ...schemas import VideoModel
 from ...settings import settings
@@ -140,3 +140,25 @@ class VideoService:
             )
 
         return video
+
+    @staticmethod
+    async def delete_video(session, video: Video, s3: S3Service):
+        try:
+
+            current_video = await s3.delete_file(video.s3_key)
+
+            if not current_video:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to delete file from storage",
+                )
+
+            await session.delete(video)
+            await session.commit()
+
+        except Exception:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to delete video",
+            )
