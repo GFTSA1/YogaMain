@@ -1,15 +1,9 @@
-from typing import Annotated, Optional
-from fastapi import APIRouter, HTTPException, status, File, UploadFile, Form, Query
-from sqlmodel import select
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import selectinload
-from sqlmodel.ext.asyncio.session import AsyncSession
+from typing import Optional
+from fastapi import APIRouter, status, File, UploadFile, Form, Query
 
-from ..database import get_session
-from ..models import Video, YogaCourse
-from ..schemas import VideoModel
+from ..schemas import VideoModel, VideoPatchModel
 from ..settings import settings
-from ..utils import VideoService, FileValidator, to_video_response, CloudFrontService
+from ..utils import VideoService, FileValidator, to_video_response
 from ..dependencies import SessionDep, S3ServiceDep, CloudfrontDep
 
 videos_router = APIRouter(prefix="/courses/{course_id}/videos", tags=["Video"])
@@ -79,11 +73,31 @@ async def get_video(
 
 @videos_router.patch(
     "/{video_id}",
-    response_model=VideoModel,
+    response_model=VideoPatchModel,
     status_code=status.HTTP_200_OK,
 )
-async def update_video(course_id: int, video_id: int, session: SessionDep):
-    pass
+async def update_video(
+    course_id: int,
+    video_id: int,
+    data: VideoPatchModel,
+    session: SessionDep,
+    cloudfront: CloudfrontDep,
+):
+    video = await VideoService.get_by_id_and_course(
+        session,
+        video_id,
+        course_id,
+    )
+
+    update_data = data.model_dump(exclude_unset=True)
+
+    video.sqlmodel_update(update_data)
+
+    session.add(video)
+    await session.commit()
+    await session.refresh(video)
+
+    return to_video_response(video, cloudfront)
 
 
 @videos_router.delete("/{video_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -91,5 +105,5 @@ async def delete_video(
     course_id: int, video_id: int, session: SessionDep, s3: S3ServiceDep
 ):
     video = await VideoService.get_by_id_and_course(session, video_id, course_id)
-    
+
     await VideoService.delete_video(session, video, s3)

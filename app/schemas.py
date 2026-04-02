@@ -124,3 +124,8 @@ class VideoModel(SQLModel):
     duration_seconds: Optional[int]
     is_active: bool
     url: str
+
+
+class VideoPatchModel(SQLModel):
+    title: Optional[str] = None
+    is_active: Optional[bool] = True
