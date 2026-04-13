@@ -6,6 +6,7 @@ from httpx import AsyncClient, ASGITransport
 
 from app.main import app
 from app.database import get_session
+from app.dependencies import S3ServiceDep, CloudfrontDep
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 

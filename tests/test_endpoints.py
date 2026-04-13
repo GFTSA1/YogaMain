@@ -1172,3 +1172,172 @@ async def test_delete_group_training_wrong_id(client):
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+"""
+TESTS FOR VIDEO
+"""
+
+
+async def test_upload_video(client):
+    course = await client.post(
+        "/courses",
+        json={
+            "name": "Course",
+            "description": "Desc",
+            "price": 10,
+            "level": "Beginner",
+        },
+    )
+    course_id = course.json()["id"]
+
+    response = await client.post(
+        f"/courses/{course_id}/videos",
+        files={"file": ("video.mp4", b"fake", "video/mp4")},
+        data={"title": "My Video"},
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json()["title"] == "My Video"
+
+
+async def test_upload_video_wrong_data(client):
+    course = await client.post(
+        "/courses",
+        json={
+            "name": "Course",
+            "description": "Desc",
+            "price": 10,
+            "level": "Beginner",
+        },
+    )
+    course_id = course.json()["id"]
+
+    response = await client.post(
+        f"/courses/{course_id}/videos",
+        files={"file": ("file.txt", b"not-a-video", "text/plain")},
+        data={"title": "Bad file"},
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+async def test_get_videos(client):
+    course = await client.post(
+        "/courses",
+        json={
+            "name": "Course",
+            "description": "Desc",
+            "price": 10,
+            "level": "Beginner",
+        },
+    )
+    course_id = course.json()["id"]
+
+    await client.post(
+        f"/courses/{course_id}/videos",
+        files={"file": ("video.mp4", b"data", "video/mp4")},
+        data={"title": "Video 1"},
+    )
+
+    response = await client.get(f"/courses/{course_id}/videos")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert len(response.json()) == 1
+
+
+async def test_get_video(client):
+    course = await client.post(
+        "/courses",
+        json={
+            "name": "Course",
+            "description": "Desc",
+            "price": 10,
+            "level": "Beginner",
+        },
+    )
+    course_id = course.json()["id"]
+
+    video = await client.post(
+        f"/courses/{course_id}/videos",
+        files={"file": ("video.mp4", b"data", "video/mp4")},
+        data={"title": "Video 1"},
+    )
+
+    video_id = video.json()["id"]
+
+    response = await client.get(f"/courses/{course_id}/videos/{video_id}")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["id"] == video_id
+
+
+async def test_update_video(client):
+    course = await client.post(
+        "/courses",
+        json={
+            "name": "Course",
+            "description": "Desc",
+            "price": 10,
+            "level": "Beginner",
+        },
+    )
+    course_id = course.json()["id"]
+
+    video = await client.post(
+        f"/courses/{course_id}/videos",
+        files={"file": ("video.mp4", b"data", "video/mp4")},
+        data={"title": "Old"},
+    )
+
+    video_id = video.json()["id"]
+
+    response = await client.patch(
+        f"/courses/{course_id}/videos/{video_id}",
+        json={"title": "New"},
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["title"] == "New"
+
+
+async def test_delete_video(client):
+    course = await client.post(
+        "/courses",
+        json={
+            "name": "Course",
+            "description": "Desc",
+            "price": 10,
+            "level": "Beginner",
+        },
+    )
+    course_id = course.json()["id"]
+
+    video = await client.post(
+        f"/courses/{course_id}/videos",
+        files={"file": ("video.mp4", b"data", "video/mp4")},
+        data={"title": "To delete"},
+    )
+
+    video_id = video.json()["id"]
+
+    response = await client.delete(f"/courses/{course_id}/videos/{video_id}")
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+
+async def test_video_not_found(client):
+    course = await client.post(
+        "/courses",
+        json={
+            "name": "Course",
+            "description": "Desc",
+            "price": 10,
+            "level": "Beginner",
+        },
+    )
+    course_id = course.json()["id"]
+
+    response = await client.get(f"/courses/{course_id}/videos/999")
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
