@@ -14,6 +14,7 @@ async def upload_video(
     course_id: int,
     session: SessionDep,
     s3: S3ServiceDep,
+    cloudfront: CloudfrontDep,
     title: str = Form(...),
     file: UploadFile = File(...),
 ):
@@ -27,14 +28,7 @@ async def upload_video(
 
     video = await VideoService.create_video(session, title, course_id, object_name, s3)
 
-    return VideoModel(
-        id=video.id,
-        title=video.title,
-        course_id=video.yoga_course_id,
-        duration_seconds=video.duration_seconds,
-        is_active=video.is_active,
-        cdn_url=f"{settings.cloudfront_domain}/{video.s3_key}",
-    )
+    return to_video_response(video, cloudfront)
 
 
 @videos_router.get(

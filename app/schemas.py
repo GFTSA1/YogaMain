@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 from datetime import datetime
 from sqlmodel import SQLModel, Field
-from pydantic import model_validator, field_validator
+from pydantic import model_validator, field_validator, ConfigDict
 from typing_extensions import Self
 
 
@@ -117,12 +117,17 @@ class GroupTrainingStudioPatchModel(SQLModel):
         return value
 
 
-class VideoModel(SQLModel):
-    id: int
+class VideoBase(SQLModel):
     title: str
+    is_active: bool = True
+
+
+class VideoModel(VideoBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
     course_id: int
     duration_seconds: Optional[int]
-    is_active: bool
     url: str
 
 
