@@ -2,7 +2,6 @@ from typing import Optional
 from fastapi import APIRouter, status, File, UploadFile, Form, Query
 
 from ..schemas import VideoModel, VideoPatchModel
-from ..settings import settings
 from ..utils import VideoService, FileValidator, to_video_response
 from ..dependencies import SessionDep, S3ServiceDep, CloudfrontDep
 
