@@ -569,7 +569,10 @@ async def test_delete_group_training_info_with_wrong_id(client):
     response = await client.get(f"/training-info/{group_training_id}")
     assert response.status_code == status.HTTP_200_OK
 
+
 """TEST FOR TRIP"""
+
+
 async def test_create_trip(client):
     response = await client.post(
         "/trips",
@@ -793,6 +796,8 @@ async def test_delete_trip_wrong_id(client):
 
 
 """TESTS FOR GROUP TRAINING INFO"""
+
+
 async def test_create_group_training(client):
     response_group_info = await client.post(
         "/training-info",
@@ -812,15 +817,16 @@ async def test_create_group_training(client):
     response_group_training = await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio.json()['id'],
-                "training_info_id": response_group_info.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio.json()["id"],
+            "training_info_id": response_group_info.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     assert response_group_training.status_code == status.HTTP_201_CREATED
-    assert response_group_training.json()['training_date'] == "2027-06-15T10:00:00"
-    assert response_group_training.json()['studio']['city'] == "Lviv"
+    assert response_group_training.json()["training_date"] == "2027-06-15T10:00:00"
+    assert response_group_training.json()["studio"]["city"] == "Lviv"
+
 
 async def test_create_group_training_without_studio(client):
     response_group_info = await client.post(
@@ -837,14 +843,15 @@ async def test_create_group_training_without_studio(client):
     response_group_training = await client.post(
         "/group-training",
         json={
-                "studio_id": 1,
-                "training_info_id": response_group_info.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": 1,
+            "training_info_id": response_group_info.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     assert response_group_training.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_group_training.json()['detail'] == 'No studio found'
+    assert response_group_training.json()["detail"] == "No studio found"
+
 
 async def test_create_group_training_without_training_info(client):
     response_studio = await client.post(
@@ -855,14 +862,15 @@ async def test_create_group_training_without_training_info(client):
     response_group_training = await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio.json()['id'],
-                "training_info_id": 1,
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio.json()["id"],
+            "training_info_id": 1,
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     assert response_group_training.status_code == status.HTTP_400_BAD_REQUEST
-    assert response_group_training.json()['detail'] == 'No training info found'
+    assert response_group_training.json()["detail"] == "No training info found"
+
 
 async def test_get_all_group_trainings(client):
     response_group_info_1 = await client.post(
@@ -886,7 +894,6 @@ async def test_get_all_group_trainings(client):
         },
     )
 
-
     response_studio_1 = await client.post(
         "/studios",
         json={"city": "Lviv", "capacity": 50, "address": "Rynok Square 1, Lviv 79000"},
@@ -899,19 +906,19 @@ async def test_get_all_group_trainings(client):
     await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio_1.json()['id'],
-                "training_info_id": response_group_info_1.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio_1.json()["id"],
+            "training_info_id": response_group_info_1.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio_2.json()['id'],
-                "training_info_id": response_group_info_2.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio_2.json()["id"],
+            "training_info_id": response_group_info_2.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     response = await client.get(
@@ -921,8 +928,8 @@ async def test_get_all_group_trainings(client):
     assert response.status_code == status.HTTP_200_OK
     assert isinstance(response.json(), list)
     assert len(response.json()) == 2
-    assert response.json()[0]['studio']['city'] == "Lviv"
-    assert response.json()[1]['training_info']['name'] == "Prenatal Yoga"
+    assert response.json()[0]["studio"]["city"] == "Lviv"
+    assert response.json()[1]["training_info"]["name"] == "Prenatal Yoga"
 
 
 async def test_get_single_group_training(client):
@@ -944,20 +951,20 @@ async def test_get_single_group_training(client):
     response_group_training_creation = await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio.json()['id'],
-                "training_info_id": response_group_info.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio.json()["id"],
+            "training_info_id": response_group_info.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     response = await client.get(
         f"/group-training/{response_group_training_creation.json()['id']}",
     )
 
-
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['training_date'] == "2027-06-15T10:00:00"
-    assert response.json()['studio']['city'] == "Lviv"
+    assert response.json()["training_date"] == "2027-06-15T10:00:00"
+    assert response.json()["studio"]["city"] == "Lviv"
+
 
 async def test_get_single_group_training_wrong_id(client):
     response_group_info = await client.post(
@@ -978,20 +985,20 @@ async def test_get_single_group_training_wrong_id(client):
     response_group_training_creation = await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio.json()['id'],
-                "training_info_id": response_group_info.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio.json()["id"],
+            "training_info_id": response_group_info.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
-    response_group_id = response_group_training_creation.json()['id']
+    response_group_id = response_group_training_creation.json()["id"]
     response = await client.get(
         f"/group-training/{response_group_id+1}",
     )
 
-
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json()['detail'] == 'No training info found'
+    assert response.json()["detail"] == "No training info found"
+
 
 async def test_patch_group_training(client):
     response_group_info = await client.post(
@@ -1012,23 +1019,21 @@ async def test_patch_group_training(client):
     response_group_training_creation = await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio.json()['id'],
-                "training_info_id": response_group_info.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio.json()["id"],
+            "training_info_id": response_group_info.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     response = await client.patch(
         f"/group-training/{response_group_training_creation.json()['id']}",
-        json={
-            "training_date": "2026-06-15T10:00:00"
-        }
+        json={"training_date": "2026-06-15T10:00:00"},
     )
 
-
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['training_date'] == "2026-06-15T10:00:00"
-    assert response.json()['studio']['city'] == "Lviv"
+    assert response.json()["training_date"] == "2026-06-15T10:00:00"
+    assert response.json()["studio"]["city"] == "Lviv"
+
 
 async def test_patch_group_training_wrong_id(client):
     response_group_info = await client.post(
@@ -1049,22 +1054,20 @@ async def test_patch_group_training_wrong_id(client):
     response_group_training_creation = await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio.json()['id'],
-                "training_info_id": response_group_info.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio.json()["id"],
+            "training_info_id": response_group_info.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     response = await client.patch(
         f"/group-training/{response_group_training_creation.json()['id'] +1}",
-        json={
-            "training_date": "2026-06-15T10:00:00"
-        }
+        json={"training_date": "2026-06-15T10:00:00"},
     )
 
-
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json()['detail'] == 'No training found'
+    assert response.json()["detail"] == "No training found"
+
 
 async def test_patch_group_training_time_in_past(client):
     response_group_info = await client.post(
@@ -1085,22 +1088,22 @@ async def test_patch_group_training_time_in_past(client):
     response_group_training_creation = await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio.json()['id'],
-                "training_info_id": response_group_info.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio.json()["id"],
+            "training_info_id": response_group_info.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     response = await client.patch(
         f"/group-training/{response_group_training_creation.json()['id']}",
-        json={
-            "training_date": "2025-06-15T10:00:00"
-        }
+        json={"training_date": "2025-06-15T10:00:00"},
     )
 
-
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-    assert response.json()['detail'][0]['msg'] == 'Value error, Time cannot be in the past'
+    assert (
+        response.json()["detail"][0]["msg"] == "Value error, Time cannot be in the past"
+    )
+
 
 async def test_delete_group_training(client):
     response_group_info = await client.post(
@@ -1121,16 +1124,15 @@ async def test_delete_group_training(client):
     response_group_training_creation = await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio.json()['id'],
-                "training_info_id": response_group_info.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio.json()["id"],
+            "training_info_id": response_group_info.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     response = await client.delete(
         f"/group-training/{response_group_training_creation.json()['id']}"
     )
-
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -1138,6 +1140,7 @@ async def test_delete_group_training(client):
         f"/group-training/{response_group_training_creation.json()['id']}"
     )
     assert response_deleted_group_training.status_code == status.HTTP_404_NOT_FOUND
+
 
 async def test_delete_group_training_wrong_id(client):
     response_group_info = await client.post(
@@ -1158,15 +1161,14 @@ async def test_delete_group_training_wrong_id(client):
     response_group_training_creation = await client.post(
         "/group-training",
         json={
-                "studio_id": response_studio.json()['id'],
-                "training_info_id": response_group_info.json()['id'],
-                "training_date": "2027-06-15T10:00:00"
-        }
+            "studio_id": response_studio.json()["id"],
+            "training_info_id": response_group_info.json()["id"],
+            "training_date": "2027-06-15T10:00:00",
+        },
     )
 
     response = await client.delete(
         f"/group-training/{response_group_training_creation.json()['id'] + 1}"
     )
-
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
