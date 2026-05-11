@@ -1,8 +1,11 @@
 import pytest
 from datetime import datetime
 from pydantic import ValidationError
+from sqlmodel import select
+from sqlalchemy.orm import selectinload
+from sqlalchemy.exc import IntegrityError
 
-from app.models import YogaCourse, Trip
+from app.models import YogaCourse, Trip, Video
 
 
 async def test_yoga_course_valid_data(db_session):
@@ -95,3 +98,63 @@ async def test_trip_name_too_short():
         YogaCourse.model_validate(invalid_data)
 
     assert "String should have at least 3 characters" in str(exc_info.value)
+
+
+async def test_video_valid_data(db_session):
+    course = YogaCourse(name="Hatha Basic", level="Beginner")
+    db_session.add(course)
+    await db_session.commit()
+
+    video = Video(
+        title="Intro to Yoga", s3_key="videos/unique_key.mp4", yoga_course_id=course.id
+    )
+    db_session.add(video)
+    await db_session.commit()
+    await db_session.refresh(video)
+
+    assert video.id is not None
+    assert video.course.name == "Hatha Basic"
+
+
+async def test_video_unique_title_per_course(db_session):
+    course = YogaCourse(name="Hatha Flow", level="Intermediate")
+    db_session.add(course)
+    await db_session.commit()
+
+    video1 = Video(title="Intro", s3_key="key1.mp4", yoga_course_id=course.id)
+    db_session.add(video1)
+    await db_session.commit()
+
+    video2 = Video(title="Intro", s3_key="key2.mp4", yoga_course_id=course.id)
+    db_session.add(video2)
+
+    with pytest.raises(IntegrityError):
+        await db_session.commit()
+
+
+async def test_video_yoga_course_relationship(db_session):
+    course = YogaCourse(name="Advanced Vinyasa", level="Advanced")
+    db_session.add(course)
+    await db_session.commit()
+
+    video1 = Video(title="Warm up", s3_key="s3://1", yoga_course_id=course.id)
+    video2 = Video(title="Main Flow", s3_key="s3://2", yoga_course_id=course.id)
+    db_session.add_all([video1, video2])
+    await db_session.commit()
+
+    statement = (
+        select(Video).where(Video.id == video1.id).options(selectinload(Video.course))
+    )
+    video_db = (await db_session.exec(statement)).one()
+    assert video_db.course.name == "Advanced Vinyasa"
+
+    statement = (
+        select(YogaCourse)
+        .where(YogaCourse.id == course.id)
+        .options(selectinload(YogaCourse.videos))
+    )
+    course_db = (await db_session.exec(statement)).one()
+
+    assert len(course_db.videos) == 2
+    assert any(v.title == "Main Flow" for v in course_db.videos)
+    assert isinstance(course_db.videos[0], Video)

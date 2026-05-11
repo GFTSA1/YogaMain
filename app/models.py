@@ -31,7 +31,7 @@ class GroupTrainingStudioUser(SQLModel, table=True):
 
 
 class User(PKMixin, table=True):
-    email: str
+    email: str = Field(index=True, unique=True)
     first_name: str
     last_name: str
     mobile_number: str
@@ -101,8 +101,12 @@ class Trip(PKMixin, table=True):
 
 
 class Video(PKMixin, table=True):
+    __table_args__ = (UniqueConstraint("yoga_course_id", "title"),)
+
     title: str = Field(nullable=False)
-    link: str
+    s3_key: str = Field(unique=True, nullable=False)
+    duration_seconds: Optional[int] = None
+    is_active: bool = Field(default=True)
     yoga_course_id: int = Field(foreign_key="yogacourse.id", nullable=False)
 
-    course: Optional["YogaCourse"] = Relationship(back_populates="videos")
+    course: "YogaCourse" = Relationship(back_populates="videos")

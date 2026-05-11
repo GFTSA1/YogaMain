@@ -6,6 +6,7 @@ from .routes import (
     training_info_router,
     trips_router,
     group_training_router,
+    videos_router,
 )
 
 app = FastAPI()
@@ -15,3 +16,5 @@ app.include_router(studio_router)
 app.include_router(training_info_router)
 app.include_router(trips_router)
 app.include_router(group_training_router)
+app.include_router(trips_router)
+app.include_router(videos_router)

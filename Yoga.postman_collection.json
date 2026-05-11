@@ -368,6 +368,203 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Course Videos",
+			"item": [
+				{
+					"name": "Create video",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Yoga Basics",
+									"type": "text",
+									"uuid": "2c57608d-dd64-4827-a09e-b46b14ed7a1b"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"uuid": "e164ae37-a307-44a8-a3b5-8c2effde9f70",
+									"src": "/home/yaromyr/Downloads/7ffd52a23143bc024ba2b34ae4dbf669.mp4"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/courses/:course_id/videos",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"courses",
+								":course_id",
+								"videos"
+							],
+							"variable": [
+								{
+									"key": "course_id",
+									"value": "1",
+									"description": "ID of yoga course"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all videos from course",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/courses/:course_id/videos",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"courses",
+								":course_id",
+								"videos"
+							],
+							"variable": [
+								{
+									"key": "course_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get video from course",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/courses/:course_id/videos/:video_id",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"courses",
+								":course_id",
+								"videos",
+								":video_id"
+							],
+							"variable": [
+								{
+									"key": "course_id",
+									"value": "2"
+								},
+								{
+									"key": "video_id",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch video",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Yoga Title\",\n  \"is_active\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/courses/:course_id/videos/:video_id",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"courses",
+								":course_id",
+								"videos",
+								":video_id"
+							],
+							"variable": [
+								{
+									"key": "course_id",
+									"value": "2"
+								},
+								{
+									"key": "video_id",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete video",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/courses/:course_id/videos/:video_id",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"courses",
+								":course_id",
+								"videos",
+								":video_id"
+							],
+							"variable": [
+								{
+									"key": "course_id",
+									"value": "3"
+								},
+								{
+									"key": "video_id",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }

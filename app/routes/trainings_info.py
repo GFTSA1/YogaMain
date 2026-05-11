@@ -1,11 +1,9 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
 
-from ..database import get_session
 from ..models import GroupTrainingInfo
-from ..schema import GroupTrainingModel, GroupTrainingPatchModel
+from ..schemas import GroupTrainingModel, GroupTrainingPatchModel
+from ..dependencies import SessionDep
 
 training_info_router = APIRouter(prefix="/training-info", tags=["Trainings-info"])
 
@@ -13,9 +11,7 @@ training_info_router = APIRouter(prefix="/training-info", tags=["Trainings-info"
 @training_info_router.get(
     "", response_model=list[GroupTrainingInfo], status_code=status.HTTP_200_OK
 )
-async def get_group_trainings(
-    session: Annotated[AsyncSession, Depends(get_session)],
-):
+async def get_group_trainings(session: SessionDep):
     trainings_info = (await session.exec(select(GroupTrainingInfo))).all()
     return trainings_info
 
@@ -23,9 +19,7 @@ async def get_group_trainings(
 @training_info_router.post(
     "", response_model=GroupTrainingInfo, status_code=status.HTTP_201_CREATED
 )
-async def create_group_training(
-    body: GroupTrainingModel, session: Annotated[AsyncSession, Depends(get_session)]
-):
+async def create_group_training(body: GroupTrainingModel, session: SessionDep):
     training_info = GroupTrainingInfo.model_validate(body)
     session.add(training_info)
     await session.commit()
@@ -37,9 +31,7 @@ async def create_group_training(
 @training_info_router.get(
     "/{training_id}", response_model=GroupTrainingModel, status_code=status.HTTP_200_OK
 )
-async def get_group_training(
-    training_id: int, session: Annotated[AsyncSession, Depends(get_session)]
-):
+async def get_group_training(training_id: int, session: SessionDep):
     training_info = await session.get(GroupTrainingInfo, training_id)
 
     if training_info is None:
@@ -54,9 +46,7 @@ async def get_group_training(
     "/{training_id}", response_model=GroupTrainingModel, status_code=status.HTTP_200_OK
 )
 async def update_group_training(
-    data: GroupTrainingPatchModel,
-    training_id: int,
-    session: Annotated[AsyncSession, Depends(get_session)],
+    data: GroupTrainingPatchModel, training_id: int, session: SessionDep
 ):
     training_info = await session.get(GroupTrainingInfo, training_id)
 
@@ -80,9 +70,7 @@ async def update_group_training(
 
 
 @training_info_router.delete("/{training_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_group_training(
-    training_id: int, session: Annotated[AsyncSession, Depends(get_session)]
-):
+async def delete_group_training(training_id: int, session: SessionDep):
     training_info = await session.get(GroupTrainingInfo, training_id)
     if training_info is None:
         raise HTTPException(

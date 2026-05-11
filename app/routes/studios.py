@@ -1,27 +1,21 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
 
-from ..database import get_session
 from ..models import Studio
-from ..schema import StudioModel, StudioPatchModel
+from ..schemas import StudioModel, StudioPatchModel
+from ..dependencies import SessionDep
 
 studio_router = APIRouter(prefix="/studios", tags=["Studios"])
 
 
 @studio_router.get("", response_model=list[Studio], status_code=status.HTTP_200_OK)
-async def get_studios(
-    session: Annotated[AsyncSession, Depends(get_session)],
-):
+async def get_studios(session: SessionDep):
     studios = (await session.exec(select(Studio))).all()
     return studios
 
 
 @studio_router.post("", response_model=Studio, status_code=status.HTTP_201_CREATED)
-async def create_studio(
-    body: StudioModel, session: Annotated[AsyncSession, Depends(get_session)]
-) -> Studio:
+async def create_studio(body: StudioModel, session: SessionDep) -> Studio:
     studio = Studio.model_validate(body)
     session.add(studio)
     await session.commit()
@@ -32,9 +26,7 @@ async def create_studio(
 @studio_router.get(
     "/{studio_id}", response_model=StudioModel, status_code=status.HTTP_200_OK
 )
-async def get_studio(
-    studio_id: int, session: Annotated[AsyncSession, Depends(get_session)]
-):
+async def get_studio(studio_id: int, session: SessionDep):
     studio = await session.get(Studio, studio_id)
     if not studio:
         raise HTTPException(
@@ -46,11 +38,7 @@ async def get_studio(
 @studio_router.patch(
     "/{studio_id}", response_model=StudioModel, status_code=status.HTTP_200_OK
 )
-async def update_studio(
-    body: StudioPatchModel,
-    studio_id: int,
-    session: Annotated[AsyncSession, Depends(get_session)],
-):
+async def update_studio(body: StudioPatchModel, studio_id: int, session: SessionDep):
     studio = await session.get(Studio, studio_id)
     if not studio:
         raise HTTPException(
@@ -74,9 +62,7 @@ async def update_studio(
 
 
 @studio_router.delete("/{studio_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_studio(
-    studio_id: int, session: Annotated[AsyncSession, Depends(get_session)]
-):
+async def delete_studio(studio_id: int, session: SessionDep):
     studio = await session.get(Studio, studio_id)
 
     if not studio:
