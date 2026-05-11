@@ -1,3 +1,10 @@
+import os
+
+os.environ.setdefault("JWT_SECRET", "test-secret-do-not-use-in-prod")
+os.environ.setdefault("JWT_ACCESS_TTL_MINUTES", "30")
+os.environ.setdefault("JWT_REFRESH_TTL_DAYS", "30")
+os.environ.setdefault("GOOGLE_CLIENT_ID", "test-google-client-id.apps.googleusercontent.com")
+
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel import SQLModel
