@@ -1,7 +1,7 @@
 from sqlalchemy import Column
 from sqlalchemy.types import DateTime
 from sqlmodel import SQLModel, Field, Relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from typing import Optional
 from sqlalchemy import UniqueConstraint
@@ -33,14 +33,17 @@ class GroupTrainingStudioUser(SQLModel, table=True):
 class User(PKMixin, table=True):
     email: str = Field(index=True, unique=True)
     first_name: str
-    last_name: str
-    mobile_number: str
-    role: str
+    last_name: Optional[str] = None
+    mobile_number: Optional[str] = None
+    role: str = Field(default="user")
+    password_hash: Optional[str] = None
+    google_sub: Optional[str] = Field(default=None, index=True, unique=True)
 
     trips: list["Trip"] = Relationship(back_populates="users", link_model=UserTrip)
     courses: list["YogaCourse"] = Relationship(
         back_populates="users", link_model=UserYogaCourse
     )
+    refresh_tokens: list["RefreshToken"] = Relationship(back_populates="user")
 
 
 class Studio(PKMixin, table=True):
@@ -110,3 +113,15 @@ class Video(PKMixin, table=True):
     yoga_course_id: int = Field(foreign_key="yogacourse.id", nullable=False)
 
     course: "YogaCourse" = Relationship(back_populates="videos")
+
+
+class RefreshToken(PKMixin, table=True):
+    user_id: int = Field(foreign_key="user.id", index=True, nullable=False)
+    token_hash: str = Field(unique=True, nullable=False)
+    issued_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+    )
+    expires_at: datetime = Field(nullable=False)
+    revoked_at: Optional[datetime] = None
+
+    user: "User" = Relationship(back_populates="refresh_tokens")
