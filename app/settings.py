@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     cloudfront_key_id: str
     cloudfront_private_key_path: str
 
+    jwt_secret: str
+    jwt_access_ttl_minutes: int = 30
+    jwt_refresh_ttl_days: int = 30
+    google_client_id: str
+
 
 @lru_cache
 def get_settings():
