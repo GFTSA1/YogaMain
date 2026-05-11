@@ -5,6 +5,16 @@ os.environ.setdefault("JWT_ACCESS_TTL_MINUTES", "30")
 os.environ.setdefault("JWT_REFRESH_TTL_DAYS", "30")
 os.environ.setdefault("GOOGLE_CLIENT_ID", "test-google-client-id.apps.googleusercontent.com")
 
+os.environ.setdefault(
+    "DATABASE_URL", "postgresql://test:test@localhost:5432/test"
+)
+os.environ.setdefault("AWS_ACCESS_KEY_ID", "test-access-key")
+os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "test-secret-key")
+os.environ.setdefault("AWS_BUCKET_NAME", "test-bucket")
+os.environ.setdefault("CLOUDFRONT_DOMAIN", "test.cloudfront.net")
+os.environ.setdefault("CLOUDFRONT_KEY_ID", "test-key-id")
+os.environ.setdefault("CLOUDFRONT_PRIVATE_KEY_PATH", "/tmp/test-cloudfront-key.pem")
+
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel import SQLModel
