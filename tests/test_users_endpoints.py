@@ -59,3 +59,45 @@ async def test_patch_me_email_conflict_returns_409(client):
 async def test_patch_me_without_token_returns_401(client):
     r = await client.patch("/users/me", json={"first_name": "x"})
     assert r.status_code == 401
+
+
+async def test_change_password_success_rotates_tokens(client):
+    tokens = await _register_user(client)
+    r = await client.post(
+        "/users/me/password",
+        json={"current_password": "hunter22", "new_password": "newpass11"},
+        headers=_auth_headers(tokens["access_token"]),
+    )
+    assert r.status_code == 200
+    new_pair = r.json()
+    assert new_pair["access_token"]
+
+    r_old = await client.post(
+        "/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
+    )
+    assert r_old.status_code == 401
+
+    r_new = await client.post(
+        "/auth/refresh", json={"refresh_token": new_pair["refresh_token"]}
+    )
+    assert r_new.status_code == 200
+
+
+async def test_change_password_wrong_current_returns_401(client):
+    tokens = await _register_user(client)
+    r = await client.post(
+        "/users/me/password",
+        json={"current_password": "wrong", "new_password": "newpass11"},
+        headers=_auth_headers(tokens["access_token"]),
+    )
+    assert r.status_code == 401
+
+
+async def test_change_password_short_new_returns_422(client):
+    tokens = await _register_user(client)
+    r = await client.post(
+        "/users/me/password",
+        json={"current_password": "hunter22", "new_password": "short"},
+        headers=_auth_headers(tokens["access_token"]),
+    )
+    assert r.status_code == 422

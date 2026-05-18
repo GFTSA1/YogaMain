@@ -2,7 +2,13 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
 from app.dependencies import CurrentUser, SessionDep
-from app.schemas import UserPatchModel, UserResponseModel
+from app.schemas import (
+    PasswordChangeModel,
+    TokenPairResponse,
+    UserPatchModel,
+    UserResponseModel,
+)
+from app.utils.auth.service import AuthService
 
 users_router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -41,4 +47,13 @@ async def patch_me(
         last_name=user.last_name,
         mobile_number=user.mobile_number,
         role=user.role,
+    )
+
+
+@users_router.post("/me/password", response_model=TokenPairResponse)
+async def change_password(
+    data: PasswordChangeModel, user: CurrentUser, session: SessionDep
+) -> TokenPairResponse:
+    return await AuthService.change_password(
+        session, user, data.current_password, data.new_password
     )
