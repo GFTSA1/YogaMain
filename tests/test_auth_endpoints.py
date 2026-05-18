@@ -119,3 +119,19 @@ async def test_refresh_with_bad_token_returns_401(client):
     r = await client.post("/auth/refresh", json={"refresh_token": "ghost"})
     assert r.status_code == 401
     assert r.json()["detail"] == "Invalid token"
+
+
+async def test_logout_returns_204_and_invalidates_refresh(client):
+    r = await _register(client)
+    refresh = r.json()["refresh_token"]
+
+    r2 = await client.post("/auth/logout", json={"refresh_token": refresh})
+    assert r2.status_code == 204
+
+    r3 = await client.post("/auth/refresh", json={"refresh_token": refresh})
+    assert r3.status_code == 401
+
+
+async def test_logout_with_unknown_token_is_204_idempotent(client):
+    r = await client.post("/auth/logout", json={"refresh_token": "ghost"})
+    assert r.status_code == 204

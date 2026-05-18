@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Response, status
 from loguru import logger
 
 from app.dependencies import GoogleVerifierDep, SessionDep
@@ -48,3 +48,9 @@ async def refresh(
     data: RefreshRequestModel, session: SessionDep
 ) -> AccessTokenResponse:
     return await AuthService.refresh(session, data.refresh_token)
+
+
+@auth_router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(data: RefreshRequestModel, session: SessionDep) -> Response:
+    await AuthService.logout(session, data.refresh_token)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
