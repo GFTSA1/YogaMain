@@ -2,7 +2,14 @@ from fastapi import APIRouter, HTTPException, status
 from loguru import logger
 
 from app.dependencies import GoogleVerifierDep, SessionDep
-from app.schemas import GoogleLoginModel, LoginModel, RegisterModel, TokenPairResponse
+from app.schemas import (
+    AccessTokenResponse,
+    GoogleLoginModel,
+    LoginModel,
+    RefreshRequestModel,
+    RegisterModel,
+    TokenPairResponse,
+)
 from app.utils.auth.service import AuthService
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -34,3 +41,10 @@ async def login_google(
         logger.warning("bad google id_token: {}", e)
         raise HTTPException(status_code=401, detail="Invalid token")
     return await AuthService.login_google(session, identity)
+
+
+@auth_router.post("/refresh", response_model=AccessTokenResponse)
+async def refresh(
+    data: RefreshRequestModel, session: SessionDep
+) -> AccessTokenResponse:
+    return await AuthService.refresh(session, data.refresh_token)
