@@ -101,3 +101,46 @@ async def test_change_password_short_new_returns_422(client):
         headers=_auth_headers(tokens["access_token"]),
     )
     assert r.status_code == 422
+
+
+async def _make_admin(client, db_session, email="admin@b.com"):
+    """Register a user then flip role to admin via direct DB."""
+    from app.models import User
+    from sqlmodel import select
+    tokens = await _register_user(client, email=email)
+    result = await db_session.exec(select(User).where(User.email == email))
+    user = result.one()
+    user.role = "admin"
+    db_session.add(user)
+    await db_session.commit()
+    return tokens
+
+
+async def test_list_users_requires_admin(client):
+    tokens = await _register_user(client)
+    r = await client.get("/users", headers=_auth_headers(tokens["access_token"]))
+    assert r.status_code == 403
+
+
+async def test_list_users_admin_returns_list(client, db_session):
+    tokens = await _make_admin(client, db_session)
+    await _register_user(client, email="u1@b.com")
+    await _register_user(client, email="u2@b.com")
+    r = await client.get("/users", headers=_auth_headers(tokens["access_token"]))
+    assert r.status_code == 200
+    body = r.json()
+    assert len(body) == 3
+    emails = {u["email"] for u in body}
+    assert {"admin@b.com", "u1@b.com", "u2@b.com"} <= emails
+
+
+async def test_list_users_pagination(client, db_session):
+    tokens = await _make_admin(client, db_session)
+    for i in range(3):
+        await _register_user(client, email=f"u{i}@b.com")
+    r = await client.get(
+        "/users?limit=2&offset=1",
+        headers=_auth_headers(tokens["access_token"]),
+    )
+    assert r.status_code == 200
+    assert len(r.json()) == 2
