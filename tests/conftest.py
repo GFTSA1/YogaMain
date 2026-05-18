@@ -65,3 +65,24 @@ async def client(db_session):
         yield ac
 
     app.dependency_overrides.clear()
+
+
+from app.utils.auth.google import GoogleVerifier, GoogleIdentity, get_google_verifier
+
+
+class StubGoogleVerifier(GoogleVerifier):
+    def __init__(self, identity_or_exc):
+        self._payload = identity_or_exc
+
+    def verify(self, id_token: str):
+        if isinstance(self._payload, Exception):
+            raise self._payload
+        return self._payload
+
+
+@pytest.fixture
+def google_override():
+    def _install(payload):
+        app.dependency_overrides[get_google_verifier] = lambda: StubGoogleVerifier(payload)
+    yield _install
+    app.dependency_overrides.pop(get_google_verifier, None)

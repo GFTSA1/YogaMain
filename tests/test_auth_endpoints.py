@@ -73,3 +73,34 @@ async def test_login_unknown_email_returns_same_401_message(client):
     )
     assert r.status_code == 401
     assert r.json()["detail"] == "Invalid credentials"
+
+
+from app.utils.auth.google import GoogleIdentity
+
+
+async def test_google_creates_new_user(client, google_override):
+    google_override(GoogleIdentity(
+        sub="sub-1", email="g@b.com", first_name="G", last_name="X"
+    ))
+    r = await client.post("/auth/google", json={"id_token": "fake"})
+    assert r.status_code == 200
+    assert r.json()["refresh_token"]
+
+
+async def test_google_auto_links_by_email(client, google_override):
+    await client.post(
+        "/auth/register",
+        json={"email": "g@b.com", "password": "hunter22", "first_name": "G"},
+    )
+    google_override(GoogleIdentity(
+        sub="sub-1", email="g@b.com", first_name="G", last_name=None
+    ))
+    r = await client.post("/auth/google", json={"id_token": "fake"})
+    assert r.status_code == 200
+
+
+async def test_google_invalid_token_returns_401(client, google_override):
+    google_override(ValueError("bad token"))
+    r = await client.post("/auth/google", json={"id_token": "fake"})
+    assert r.status_code == 401
+    assert r.json()["detail"] == "Invalid token"
