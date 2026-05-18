@@ -39,3 +39,37 @@ async def test_register_invalid_email_returns_422(client):
         json={"email": "not-an-email", "password": "hunter22", "first_name": "A"},
     )
     assert r.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+async def _register(client, email="a@b.com", password="hunter22"):
+    return await client.post(
+        "/auth/register",
+        json={"email": email, "password": password, "first_name": "A"},
+    )
+
+
+async def test_login_success(client):
+    await _register(client)
+    r = await client.post(
+        "/auth/login", json={"email": "a@b.com", "password": "hunter22"}
+    )
+    assert r.status_code == 200
+    assert r.json()["access_token"]
+    assert r.json()["refresh_token"]
+
+
+async def test_login_wrong_password_returns_401_generic(client):
+    await _register(client)
+    r = await client.post(
+        "/auth/login", json={"email": "a@b.com", "password": "wrong-pass"}
+    )
+    assert r.status_code == 401
+    assert r.json()["detail"] == "Invalid credentials"
+
+
+async def test_login_unknown_email_returns_same_401_message(client):
+    r = await client.post(
+        "/auth/login", json={"email": "nope@b.com", "password": "anything"}
+    )
+    assert r.status_code == 401
+    assert r.json()["detail"] == "Invalid credentials"
