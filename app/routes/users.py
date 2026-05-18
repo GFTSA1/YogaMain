@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 from sqlalchemy.exc import IntegrityError
 
 from app.dependencies import AdminUser, CurrentUser, SessionDep
@@ -79,3 +79,20 @@ async def list_users(
         )
         for u in users
     ]
+
+
+@users_router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(
+    user_id: int, admin: AdminUser, session: SessionDep
+) -> Response:
+    if user_id == admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Cannot delete yourself"
+        )
+    target = await UserService.get_by_id(session, user_id)
+    if target is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+    await UserService.delete_user(session, target)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

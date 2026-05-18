@@ -144,3 +144,55 @@ async def test_list_users_pagination(client, db_session):
     )
     assert r.status_code == 200
     assert len(r.json()) == 2
+
+
+async def test_delete_user_requires_admin(client):
+    tokens = await _register_user(client)
+    r = await client.delete(
+        "/users/999", headers=_auth_headers(tokens["access_token"])
+    )
+    assert r.status_code == 403
+
+
+async def test_delete_unknown_user_returns_404(client, db_session):
+    tokens = await _make_admin(client, db_session)
+    r = await client.delete(
+        "/users/99999", headers=_auth_headers(tokens["access_token"])
+    )
+    assert r.status_code == 404
+
+
+async def test_delete_self_returns_409(client, db_session):
+    tokens = await _make_admin(client, db_session)
+    me = await client.get("/users/me", headers=_auth_headers(tokens["access_token"]))
+    my_id = me.json()["id"]
+    r = await client.delete(
+        f"/users/{my_id}", headers=_auth_headers(tokens["access_token"])
+    )
+    assert r.status_code == 409
+
+
+async def test_delete_user_cascades_refresh_tokens(client, db_session):
+    from app.models import RefreshToken
+    from sqlmodel import select
+
+    admin_tokens = await _make_admin(client, db_session)
+    victim = await _register_user(client, email="victim@b.com")
+
+    rows = (await db_session.exec(select(RefreshToken))).all()
+    victim_refresh = [r for r in rows if r.token_hash]
+    assert victim_refresh
+
+    me = await client.get(
+        "/users/me", headers=_auth_headers(victim["access_token"])
+    )
+    victim_id = me.json()["id"]
+
+    r = await client.delete(
+        f"/users/{victim_id}", headers=_auth_headers(admin_tokens["access_token"])
+    )
+    assert r.status_code == 204
+
+    remaining = (await db_session.exec(select(RefreshToken))).all()
+    for row in remaining:
+        assert row.user_id != victim_id
