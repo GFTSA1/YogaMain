@@ -1,5 +1,5 @@
 from functools import lru_cache
-from pydantic import PostgresDsn
+from pydantic import PostgresDsn, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     cloudfront_domain: str
     cloudfront_key_id: str
     cloudfront_private_key_path: str
+
+    redis_url: RedisDsn
 
 
 @lru_cache
