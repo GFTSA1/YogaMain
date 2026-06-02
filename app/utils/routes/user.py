@@ -1,4 +1,9 @@
 from sqlmodel import select
+from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
+
+from app.schemas import UserPatchModel
+
 
 from app.models import (
     GroupTrainingStudioUser,
@@ -32,3 +37,18 @@ class UserService:
                 await session.delete(row)
         await session.delete(user)
         await session.commit()
+
+    @staticmethod
+    async def update_user(session, user: User, data: UserPatchModel) -> User:
+        user_update = data.model_dump(exclude_unset=True)
+        user.sqlmodel_update(user_update)
+        session.add(user)
+        try:
+            await session.commit()
+            await session.refresh(user)
+        except IntegrityError:
+            await session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Email already in use"
+            )
+        return user

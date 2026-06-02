@@ -38,4 +38,4 @@ def decode_access_token(token: str) -> int:
     try:
         return int(sub)
     except (TypeError, ValueError):
-        raise InvalidTokenError("non-integer sub")
+        raise InvalidTokenError("invalid sub")

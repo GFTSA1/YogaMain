@@ -30,24 +30,15 @@ async def get_me(user: CurrentUser) -> UserResponseModel:
 async def patch_me(
     data: UserPatchModel, user: CurrentUser, session: SessionDep
 ) -> UserResponseModel:
-    user.sqlmodel_update(data.model_dump(exclude_unset=True))
-    session.add(user)
-    try:
-        await session.commit()
-        await session.refresh(user)
-    except IntegrityError:
-        await session.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Email already in use"
-        )
+    updated_user = await UserService.update_user(session, user, data)
 
     return UserResponseModel(
-        id=user.id,
-        email=user.email,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        mobile_number=user.mobile_number,
-        role=user.role,
+        id=updated_user.id,
+        email=updated_user.email,
+        first_name=updated_user.first_name,
+        last_name=updated_user.last_name,
+        mobile_number=updated_user.mobile_number,
+        role=updated_user.role,
     )
 
 

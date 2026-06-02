@@ -119,7 +119,8 @@ class RefreshToken(PKMixin, table=True):
     user_id: int = Field(foreign_key="user.id", index=True, nullable=False)
     token_hash: str = Field(unique=True, nullable=False)
     issued_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+        default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None),
+        nullable=False,
     )
     expires_at: datetime = Field(nullable=False)
     revoked_at: Optional[datetime] = None
