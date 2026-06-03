@@ -16,11 +16,6 @@ async def _make_user(db_session) -> User:
 
 
 def test_issued_at_default_is_naive_utc():
-    # The refreshtoken columns are TIMESTAMP WITHOUT TIME ZONE, and the project
-    # convention (see RefreshTokenService._utcnow) is naive UTC everywhere.
-    # The default_factory value is what gets passed to asyncpg at INSERT time;
-    # an aware datetime there makes asyncpg fail to encode it on PostgreSQL.
-    # (SQLite round-trips strip tzinfo, so this must check the unsaved object.)
     row = RefreshToken(user_id=1, token_hash="x", expires_at=datetime(2030, 1, 1))
 
     assert row.issued_at.tzinfo is None

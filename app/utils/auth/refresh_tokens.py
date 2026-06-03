@@ -13,12 +13,6 @@ def _hash_token(raw: str) -> str:
 
 
 def _utcnow() -> datetime:
-    """Return current UTC time as a naive datetime (timezone-unaware).
-
-    SQLite stores datetimes without timezone info, so we keep everything naive
-    UTC to avoid offset-naive/offset-aware comparison errors in tests.
-    PostgreSQL in production receives the same naive UTC values correctly.
-    """
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
