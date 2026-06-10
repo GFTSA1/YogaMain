@@ -5,13 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from app.schemas import UserPatchModel
 
 
-from app.models import (
-    GroupTrainingStudioUser,
-    RefreshToken,
-    User,
-    UserTrip,
-    UserYogaCourse,
-)
+from app.models import User
 
 
 class UserService:
@@ -26,15 +20,6 @@ class UserService:
 
     @staticmethod
     async def delete_user(session, user: User) -> None:
-        for model, attr in (
-            (RefreshToken, RefreshToken.user_id),
-            (UserTrip, UserTrip.user_id),
-            (UserYogaCourse, UserYogaCourse.user_id),
-            (GroupTrainingStudioUser, GroupTrainingStudioUser.user_id),
-        ):
-            rows = (await session.exec(select(model).where(attr == user.id))).all()
-            for row in rows:
-                await session.delete(row)
         await session.delete(user)
         await session.commit()
 

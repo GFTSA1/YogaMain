@@ -16,14 +16,7 @@ users_router = APIRouter(prefix="/users", tags=["Users"])
 
 @users_router.get("/me", response_model=UserResponseModel)
 async def get_me(user: CurrentUser) -> UserResponseModel:
-    return UserResponseModel(
-        id=user.id,
-        email=user.email,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        mobile_number=user.mobile_number,
-        role=user.role,
-    )
+    return UserResponseModel.model_validate(user)
 
 
 @users_router.patch("/me", response_model=UserResponseModel)
@@ -32,14 +25,7 @@ async def patch_me(
 ) -> UserResponseModel:
     updated_user = await UserService.update_user(session, user, data)
 
-    return UserResponseModel(
-        id=updated_user.id,
-        email=updated_user.email,
-        first_name=updated_user.first_name,
-        last_name=updated_user.last_name,
-        mobile_number=updated_user.mobile_number,
-        role=updated_user.role,
-    )
+    return UserResponseModel.model_validate(updated_user)
 
 
 @users_router.post("/me/password", response_model=TokenPairResponse)
@@ -59,17 +45,7 @@ async def list_users(
     offset: int = Query(default=0, ge=0),
 ) -> list[UserResponseModel]:
     users = await UserService.list_users(session, limit=limit, offset=offset)
-    return [
-        UserResponseModel(
-            id=u.id,
-            email=u.email,
-            first_name=u.first_name,
-            last_name=u.last_name,
-            mobile_number=u.mobile_number,
-            role=u.role,
-        )
-        for u in users
-    ]
+    return [UserResponseModel.model_validate(u) for u in users]
 
 
 @users_router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)

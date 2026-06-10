@@ -169,6 +169,8 @@ class AccessTokenResponse(SQLModel):
 
 
 class UserResponseModel(SQLModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: EmailStr
     first_name: str

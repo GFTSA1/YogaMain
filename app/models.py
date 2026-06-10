@@ -12,19 +12,25 @@ class PKMixin(SQLModel):
 
 
 class UserTrip(SQLModel, table=True):
-    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    user_id: int = Field(
+        foreign_key="user.id", ondelete="CASCADE", primary_key=True
+    )
     trip_id: int = Field(foreign_key="trip.id", primary_key=True)
 
 
 class UserYogaCourse(SQLModel, table=True):
     course_id: int = Field(foreign_key="yogacourse.id", primary_key=True)
-    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    user_id: int = Field(
+        foreign_key="user.id", ondelete="CASCADE", primary_key=True
+    )
 
     is_paid: bool
 
 
 class GroupTrainingStudioUser(SQLModel, table=True):
-    user_id: int = Field(foreign_key="user.id", primary_key=True)
+    user_id: int = Field(
+        foreign_key="user.id", ondelete="CASCADE", primary_key=True
+    )
     group_training_studio_id: int = Field(
         foreign_key="grouptrainingstudio.id", primary_key=True
     )
@@ -39,11 +45,20 @@ class User(PKMixin, table=True):
     password_hash: Optional[str] = None
     google_sub: Optional[str] = Field(default=None, index=True, unique=True)
 
-    trips: list["Trip"] = Relationship(back_populates="users", link_model=UserTrip)
-    courses: list["YogaCourse"] = Relationship(
-        back_populates="users", link_model=UserYogaCourse
+    trips: list["Trip"] = Relationship(
+        back_populates="users",
+        link_model=UserTrip,
+        sa_relationship_kwargs={"passive_deletes": True},
     )
-    refresh_tokens: list["RefreshToken"] = Relationship(back_populates="user")
+    courses: list["YogaCourse"] = Relationship(
+        back_populates="users",
+        link_model=UserYogaCourse,
+        sa_relationship_kwargs={"passive_deletes": True},
+    )
+    refresh_tokens: list["RefreshToken"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"passive_deletes": True},
+    )
 
 
 class Studio(PKMixin, table=True):
@@ -116,7 +131,9 @@ class Video(PKMixin, table=True):
 
 
 class RefreshToken(PKMixin, table=True):
-    user_id: int = Field(foreign_key="user.id", index=True, nullable=False)
+    user_id: int = Field(
+        foreign_key="user.id", ondelete="CASCADE", index=True, nullable=False
+    )
     token_hash: str = Field(unique=True, nullable=False)
     issued_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None),

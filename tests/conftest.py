@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -14,6 +15,16 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 engine = create_async_engine(
     TEST_DATABASE_URL,
 )
+
+
+# SQLite disables foreign-key enforcement (and therefore ON DELETE CASCADE) by
+# default; enable it per connection so tests exercise the same cascade behavior
+# Postgres uses in production.
+@event.listens_for(engine.sync_engine, "connect")
+def _enable_sqlite_foreign_keys(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 AsyncTestingSessionLocal = async_sessionmaker(
     bind=engine, class_=AsyncSession, expire_on_commit=False
