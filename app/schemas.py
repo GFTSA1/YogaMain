@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 from datetime import datetime
 from sqlmodel import SQLModel, Field
-from pydantic import model_validator, field_validator, ConfigDict
+from pydantic import model_validator, field_validator, ConfigDict, EmailStr
 from typing_extensions import Self
 
 
@@ -134,3 +134,58 @@ class VideoModel(VideoBase):
 class VideoPatchModel(SQLModel):
     title: Optional[str] = None
     is_active: Optional[bool] = True
+
+
+class RegisterModel(SQLModel):
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=72)
+    first_name: str = Field(min_length=1, max_length=128)
+    last_name: Optional[str] = Field(default=None, max_length=128)
+    mobile_number: Optional[str] = Field(default=None, max_length=32)
+
+
+class LoginModel(SQLModel):
+    email: EmailStr
+    password: str
+
+
+class GoogleLoginModel(SQLModel):
+    id_token: str
+
+
+class RefreshRequestModel(SQLModel):
+    refresh_token: str
+
+
+class TokenPairResponse(SQLModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class AccessTokenResponse(SQLModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+class UserResponseModel(SQLModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: EmailStr
+    first_name: str
+    last_name: Optional[str] = None
+    mobile_number: Optional[str] = None
+    role: str
+
+
+class UserPatchModel(SQLModel):
+    first_name: Optional[str] = Field(default=None, min_length=1, max_length=128)
+    last_name: Optional[str] = Field(default=None, max_length=128)
+    mobile_number: Optional[str] = Field(default=None, max_length=32)
+    email: Optional[EmailStr] = None
+
+
+class PasswordChangeModel(SQLModel):
+    current_password: str
+    new_password: str = Field(min_length=8, max_length=72)

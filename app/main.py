@@ -7,6 +7,8 @@ from .routes import (
     trips_router,
     group_training_router,
     videos_router,
+    auth_router,
+    users_router,
 )
 
 app = FastAPI()
@@ -18,3 +20,5 @@ app.include_router(trips_router)
 app.include_router(group_training_router)
 app.include_router(trips_router)
 app.include_router(videos_router)
+app.include_router(auth_router)
+app.include_router(users_router)

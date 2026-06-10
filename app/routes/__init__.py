@@ -5,3 +5,5 @@ from .trips import trips_router
 from .group_trainings import group_training_router
 from .trips import trips_router
 from .videos import videos_router
+from .auth import auth_router
+from .users import users_router

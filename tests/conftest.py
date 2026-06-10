@@ -1,8 +1,11 @@
 import pytest
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 from httpx import AsyncClient, ASGITransport
+from app.utils.auth.google import GoogleVerifier, GoogleIdentity, get_google_verifier
+
 
 from app.main import app
 from app.database import get_session
@@ -12,6 +15,16 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 engine = create_async_engine(
     TEST_DATABASE_URL,
 )
+
+
+# SQLite disables foreign-key enforcement (and therefore ON DELETE CASCADE) by
+# default; enable it per connection so tests exercise the same cascade behavior
+# Postgres uses in production.
+@event.listens_for(engine.sync_engine, "connect")
+def _enable_sqlite_foreign_keys(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 AsyncTestingSessionLocal = async_sessionmaker(
     bind=engine, class_=AsyncSession, expire_on_commit=False
@@ -48,3 +61,21 @@ async def client(db_session):
         yield ac
 
     app.dependency_overrides.clear()
+
+
+class StubGoogleVerifier(GoogleVerifier):
+    def __init__(self, identity_or_exc):
+        self._payload = identity_or_exc
+
+    def verify(self, id_token: str):
+        if isinstance(self._payload, Exception):
+            raise self._payload
+        return self._payload
+
+
+@pytest.fixture
+def google_override():
+    def _install(payload):
+        app.dependency_overrides[get_google_verifier] = lambda: StubGoogleVerifier(payload)
+    yield _install
+    app.dependency_overrides.pop(get_google_verifier, None)
