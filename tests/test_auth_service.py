@@ -13,7 +13,10 @@ async def test_register_creates_user_and_returns_token_pair(db_session):
     pair = await AuthService.register(
         db_session,
         RegisterModel(
-            email="a@b.com", password="hunter22", first_name="A", last_name="B",
+            email="a@b.com",
+            password="hunter22",
+            first_name="A",
+            last_name="B",
         ),
     )
     assert pair.access_token and pair.refresh_token
@@ -65,7 +68,9 @@ async def test_login_password_for_google_only_user_401(db_session):
 
 
 async def test_login_google_creates_new_user(db_session):
-    identity = GoogleIdentity(sub="sub-1", email="g@b.com", first_name="G", last_name="X")
+    identity = GoogleIdentity(
+        sub="sub-1", email="g@b.com", first_name="G", last_name="X"
+    )
     pair = await AuthService.login_google(db_session, identity)
     assert pair.access_token and pair.refresh_token
     user = (await db_session.exec(select(User))).one()
@@ -77,7 +82,9 @@ async def test_login_google_auto_links_by_email(db_session):
     await AuthService.register(
         db_session, RegisterModel(email="g@b.com", password="hunter22", first_name="G")
     )
-    identity = GoogleIdentity(sub="sub-1", email="g@b.com", first_name="G", last_name=None)
+    identity = GoogleIdentity(
+        sub="sub-1", email="g@b.com", first_name="G", last_name=None
+    )
     await AuthService.login_google(db_session, identity)
     user = (await db_session.exec(select(User))).one()
     assert user.google_sub == "sub-1"
@@ -85,9 +92,13 @@ async def test_login_google_auto_links_by_email(db_session):
 
 
 async def test_login_google_matches_by_sub_even_if_email_changed(db_session):
-    identity1 = GoogleIdentity(sub="sub-1", email="old@b.com", first_name="G", last_name=None)
+    identity1 = GoogleIdentity(
+        sub="sub-1", email="old@b.com", first_name="G", last_name=None
+    )
     await AuthService.login_google(db_session, identity1)
-    identity2 = GoogleIdentity(sub="sub-1", email="new@b.com", first_name="G", last_name=None)
+    identity2 = GoogleIdentity(
+        sub="sub-1", email="new@b.com", first_name="G", last_name=None
+    )
     await AuthService.login_google(db_session, identity2)
     users = (await db_session.exec(select(User))).all()
     assert len(users) == 1

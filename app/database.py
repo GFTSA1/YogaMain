@@ -5,7 +5,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.settings import settings
 
-
 DATABASE_URL = (
     str(settings.database_url).replace("postgresql://", "postgresql+asyncpg://")
 ).split("?")[0]

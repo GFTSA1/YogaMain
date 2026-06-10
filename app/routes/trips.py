@@ -5,7 +5,6 @@ from ..models import Trip
 from ..schemas import TripModel, TripPatchModel
 from ..dependencies import SessionDep
 
-
 trips_router = APIRouter(prefix="/trips", tags=["Trips"])
 
 

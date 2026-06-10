@@ -26,6 +26,7 @@ def _enable_sqlite_foreign_keys(dbapi_connection, connection_record):
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 
+
 AsyncTestingSessionLocal = async_sessionmaker(
     bind=engine, class_=AsyncSession, expire_on_commit=False
 )
@@ -76,6 +77,9 @@ class StubGoogleVerifier(GoogleVerifier):
 @pytest.fixture
 def google_override():
     def _install(payload):
-        app.dependency_overrides[get_google_verifier] = lambda: StubGoogleVerifier(payload)
+        app.dependency_overrides[get_google_verifier] = lambda: StubGoogleVerifier(
+            payload
+        )
+
     yield _install
     app.dependency_overrides.pop(get_google_verifier, None)

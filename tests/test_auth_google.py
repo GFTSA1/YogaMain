@@ -12,13 +12,15 @@ class _StubVerifier(GoogleVerifier):
 
 
 def test_verifier_returns_identity_on_verified_email():
-    v = _StubVerifier({
-        "sub": "google-sub-123",
-        "email": "u@example.com",
-        "email_verified": True,
-        "given_name": "Test",
-        "family_name": "User",
-    })
+    v = _StubVerifier(
+        {
+            "sub": "google-sub-123",
+            "email": "u@example.com",
+            "email_verified": True,
+            "given_name": "Test",
+            "family_name": "User",
+        }
+    )
     identity = v.verify("fake-id-token")
     assert identity == GoogleIdentity(
         sub="google-sub-123",
@@ -29,24 +31,28 @@ def test_verifier_returns_identity_on_verified_email():
 
 
 def test_verifier_rejects_unverified_email():
-    v = _StubVerifier({
-        "sub": "google-sub-123",
-        "email": "u@example.com",
-        "email_verified": False,
-        "given_name": "Test",
-        "family_name": "User",
-    })
+    v = _StubVerifier(
+        {
+            "sub": "google-sub-123",
+            "email": "u@example.com",
+            "email_verified": False,
+            "given_name": "Test",
+            "family_name": "User",
+        }
+    )
     with pytest.raises(ValueError):
         v.verify("fake-id-token")
 
 
 def test_verifier_handles_missing_family_name():
-    v = _StubVerifier({
-        "sub": "google-sub-123",
-        "email": "u@example.com",
-        "email_verified": True,
-        "given_name": "Mononym",
-    })
+    v = _StubVerifier(
+        {
+            "sub": "google-sub-123",
+            "email": "u@example.com",
+            "email_verified": True,
+            "given_name": "Mononym",
+        }
+    )
     identity = v.verify("fake-id-token")
     assert identity.last_name is None
 

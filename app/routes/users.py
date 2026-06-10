@@ -49,9 +49,7 @@ async def list_users(
 
 
 @users_router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(
-    user_id: int, admin: AdminUser, session: SessionDep
-) -> Response:
+async def delete_user(user_id: int, admin: AdminUser, session: SessionDep) -> Response:
     if user_id == admin.id:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Cannot delete yourself"

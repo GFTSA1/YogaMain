@@ -107,6 +107,7 @@ async def _make_admin(client, db_session, email="admin@b.com"):
     """Register a user then flip role to admin via direct DB."""
     from app.models import User
     from sqlmodel import select
+
     tokens = await _register_user(client, email=email)
     result = await db_session.exec(select(User).where(User.email == email))
     user = result.one()
@@ -148,9 +149,7 @@ async def test_list_users_pagination(client, db_session):
 
 async def test_delete_user_requires_admin(client):
     tokens = await _register_user(client)
-    r = await client.delete(
-        "/users/999", headers=_auth_headers(tokens["access_token"])
-    )
+    r = await client.delete("/users/999", headers=_auth_headers(tokens["access_token"]))
     assert r.status_code == 403
 
 
@@ -183,9 +182,7 @@ async def test_delete_user_cascades_refresh_tokens(client, db_session):
     victim_refresh = [r for r in rows if r.token_hash]
     assert victim_refresh
 
-    me = await client.get(
-        "/users/me", headers=_auth_headers(victim["access_token"])
-    )
+    me = await client.get("/users/me", headers=_auth_headers(victim["access_token"]))
     victim_id = me.json()["id"]
 
     r = await client.delete(

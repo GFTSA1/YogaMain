@@ -59,7 +59,9 @@ async def test_validate_returns_none_for_expired_token(db_session):
     raw = await RefreshTokenService.issue(db_session, user.id)
     # Backdate expiry
     row = (await db_session.exec(select(RefreshToken))).one()
-    row.expires_at = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(seconds=1)
+    row.expires_at = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(
+        seconds=1
+    )
     db_session.add(row)
     await db_session.commit()
 

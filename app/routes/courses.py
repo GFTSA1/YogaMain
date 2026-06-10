@@ -5,7 +5,6 @@ from ..models import YogaCourse
 from ..schemas import YogaCourseModel, YogaCoursePatchModel
 from ..dependencies import SessionDep
 
-
 courses_router = APIRouter(prefix="/courses", tags=["Courses"])
 
 

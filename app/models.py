@@ -12,25 +12,19 @@ class PKMixin(SQLModel):
 
 
 class UserTrip(SQLModel, table=True):
-    user_id: int = Field(
-        foreign_key="user.id", ondelete="CASCADE", primary_key=True
-    )
+    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE", primary_key=True)
     trip_id: int = Field(foreign_key="trip.id", primary_key=True)
 
 
 class UserYogaCourse(SQLModel, table=True):
     course_id: int = Field(foreign_key="yogacourse.id", primary_key=True)
-    user_id: int = Field(
-        foreign_key="user.id", ondelete="CASCADE", primary_key=True
-    )
+    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE", primary_key=True)
 
     is_paid: bool
 
 
 class GroupTrainingStudioUser(SQLModel, table=True):
-    user_id: int = Field(
-        foreign_key="user.id", ondelete="CASCADE", primary_key=True
-    )
+    user_id: int = Field(foreign_key="user.id", ondelete="CASCADE", primary_key=True)
     group_training_studio_id: int = Field(
         foreign_key="grouptrainingstudio.id", primary_key=True
     )

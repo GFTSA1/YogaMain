@@ -65,9 +65,7 @@ class AuthService:
     @staticmethod
     async def login_google(session, identity: GoogleIdentity) -> TokenPairResponse:
         # 1. match by sub
-        result = await session.exec(
-            select(User).where(User.google_sub == identity.sub)
-        )
+        result = await session.exec(select(User).where(User.google_sub == identity.sub))
         user = result.first()
 
         if user is None:

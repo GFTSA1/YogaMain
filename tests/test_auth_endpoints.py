@@ -79,9 +79,9 @@ from app.utils.auth.google import GoogleIdentity
 
 
 async def test_google_creates_new_user(client, google_override):
-    google_override(GoogleIdentity(
-        sub="sub-1", email="g@b.com", first_name="G", last_name="X"
-    ))
+    google_override(
+        GoogleIdentity(sub="sub-1", email="g@b.com", first_name="G", last_name="X")
+    )
     r = await client.post("/auth/google", json={"id_token": "fake"})
     assert r.status_code == 200
     assert r.json()["refresh_token"]
@@ -92,9 +92,9 @@ async def test_google_auto_links_by_email(client, google_override):
         "/auth/register",
         json={"email": "g@b.com", "password": "hunter22", "first_name": "G"},
     )
-    google_override(GoogleIdentity(
-        sub="sub-1", email="g@b.com", first_name="G", last_name=None
-    ))
+    google_override(
+        GoogleIdentity(sub="sub-1", email="g@b.com", first_name="G", last_name=None)
+    )
     r = await client.post("/auth/google", json={"id_token": "fake"})
     assert r.status_code == 200
 
