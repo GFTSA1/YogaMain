@@ -1,4 +1,8 @@
+import redis.asyncio as aioredis
+
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from os import getenv
 
 from .routes import (
     courses_router,
@@ -10,6 +14,12 @@ from .routes import (
     auth_router,
     users_router,
 )
+
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ...
 
 app = FastAPI()
 
