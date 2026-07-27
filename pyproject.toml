@@ -56,6 +56,7 @@ exclude = [
     ".venv",
     "__pycache__",
     "**/migrations/*",
+    "db/versions/*",
 ]
 
 [tool.ruff.lint]
@@ -75,6 +76,9 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
     "F841",
-    "S101", 
-    "db/env.py" = ["F403", "F401"],
+    "S101",
+]
+"db/env.py" = [
+    "F403",
+    "F401",
 ]
