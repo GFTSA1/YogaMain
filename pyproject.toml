@@ -76,7 +76,5 @@ ignore = [
 "tests/*" = [
     "F841",
     "S101", 
+    "db/env.py" = ["F403", "F401"],
 ]
-
-[tool.ruff.lint.per-file-ignores]
-"db/env.py" = ["F403", "F401"]
