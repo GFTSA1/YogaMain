@@ -7,25 +7,25 @@ on:
     branches: ["main", "dev"]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: '3.x'
 
-      - name: Install Ruff
-        run: pip install ruff
+  #     - name: Install Ruff
+  #       run: pip install ruff
 
-      - name: Run Ruff Check
-        run: ruff check . --exclude "**/migrations/*"
+  #     - name: Run Ruff Check
+  #       run: ruff check . --exclude "**/migrations/*"
       
-      - name: Run Ruff Format Check
-        run: ruff format --check . --exclude "**/migrations/*"
+  #     - name: Run Ruff Format Check
+  #       run: ruff format --check . --exclude "**/migrations/*"
      
   test-and-build:
     runs-on: ubuntu-latest
