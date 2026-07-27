@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     google_client_id: str
     redis_url: RedisDsn
 
+    frontend_origins: list[str]
+
 
 @lru_cache
 def get_settings():
